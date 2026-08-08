@@ -32,3 +32,8 @@ frontend/.vite/
 
 # OS
 .DS_Store
+
+# macOS AppleDouble sidecars on non-HFS volumes
+._*
+.Spotlight-V100
+.Trashes
