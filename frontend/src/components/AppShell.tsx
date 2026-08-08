@@ -46,11 +46,8 @@ export function AppShell({
           </button>
 
           {/* A rail rather than a wrapping row: on a phone four pills do not
-              fit on one line, and wrapping them pushes the page down. The
-              negative margin lets the rail bleed to the screen edge, so a
-              pill scrolled out of view leaves the page rather than being cut
-              off inside the gutter. */}
-          <nav className="myo-rail sm:ml-auto -mx-6 px-6 sm:mx-0 sm:px-0">
+              fit on one line, and wrapping them pushes the page down. */}
+          <nav className="myo-rail sm:ml-auto">
             {NAV.map((item) => (
               <button
                 key={item.id}

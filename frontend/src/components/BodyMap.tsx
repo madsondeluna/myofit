@@ -12,7 +12,7 @@
  * focus ring, and a focus ring must not read as a worked muscle.
  */
 
-import { useId, useState } from "react";
+import { useState } from "react";
 import type { MuscleId, MuscleLoad, ViewId } from "../api";
 import { muscleLabel } from "../api";
 // Geometry, mirror transform and canvas all come from the figure module, so a
@@ -72,10 +72,15 @@ interface FigureProps {
   fills: Map<MuscleId, number>;
   onSelect?: (muscle: MuscleId) => void;
   selected?: MuscleId | null;
-  titleId: string;
 }
 
-function Figure({ view, fills, onSelect, selected, titleId }: FigureProps) {
+/**
+ * The figure names itself with aria-label rather than a <title> child. A title
+ * on the svg root makes the browser show a tooltip over the whole figure,
+ * which covered the page whenever the pointer crossed it. The per-muscle
+ * titles stay, because there the tooltip is the point.
+ */
+function Figure({ view, fills, onSelect, selected }: FigureProps) {
   const muscles = MUSCLES_BY_VIEW[view];
 
   return (
@@ -83,12 +88,11 @@ function Figure({ view, fills, onSelect, selected, titleId }: FigureProps) {
       viewBox={`0 0 ${VIEW_BOX.width} ${VIEW_BOX.height}`}
       className="myo-figure w-full h-auto"
       role="img"
-      aria-labelledby={titleId}
+      aria-label={
+        view === "front" ? "Mapa corporal, vista frontal" : "Mapa corporal, vista posterior"
+      }
       preserveAspectRatio="xMidYMid meet"
     >
-      <title id={titleId}>
-        {view === "front" ? "Mapa corporal, vista frontal" : "Mapa corporal, vista posterior"}
-      </title>
 
       {/* Silhouette. Drawn first so muscle shapes sit on top of it. */}
       <g className="myo-base">
@@ -151,7 +155,6 @@ export function BodyMap({
   // shows one at a time behind this toggle. On a wide viewport both render and
   // the toggle is hidden.
   const [view, setView] = useState<ViewId>("front");
-  const baseId = useId();
   const fills = buildFills(primary, secondary, load);
 
   return (
@@ -177,7 +180,6 @@ export function BodyMap({
             fills={fills}
             onSelect={onSelect}
             selected={selected}
-            titleId={`${baseId}-front`}
           />
         </div>
         <div className={view === "back" ? "" : "hidden sm:block"}>
@@ -186,7 +188,6 @@ export function BodyMap({
             fills={fills}
             onSelect={onSelect}
             selected={selected}
-            titleId={`${baseId}-back`}
           />
         </div>
       </div>

@@ -248,9 +248,16 @@ body::before {
    under them dissolves instead of showing through as legible text. */
 
 /* The bars span the viewport edge to edge, so they keep square corners:
-   rounding a full-bleed bar leaves slivers of page at the top corners. */
+   rounding a full-bleed bar leaves slivers of page at the top corners.
+
+   They also need a near-opaque base. A sticky bar has to occlude what scrolls
+   beneath it, and .glass-deep alone tops out around a third of white: page
+   text stayed legible straight through the footer. --surface-glass is the
+   token for exactly this, a 96% surface that still lets the blur and the
+   gradient read as material rather than as a solid block. */
 .myo-bar {
   border-radius: var(--radius-0);
+  background-color: var(--surface-glass);
 }
 
 /* --- Prose ---------------------------------------------------------------
@@ -325,6 +332,15 @@ body::before {
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+
+  /* Setting overflow-x to auto makes overflow-y compute to auto as well: the
+     rail clips vertically even though nothing ever overflows that way. Without
+     this reserve it cut the glass shadow off the top and bottom of every pill,
+     which read as pills with flattened edges. The shadow runs 0 10px 28px at
+     hover, so the padding holds its visible extent and the equal negative
+     margin keeps the rail's own box unchanged. */
+  padding: var(--space-16) var(--space-20);
+  margin: calc(-1 * var(--space-16)) calc(-1 * var(--space-20));
 }
 
 .myo-rail::-webkit-scrollbar {
