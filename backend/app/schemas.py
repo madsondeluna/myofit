@@ -140,6 +140,12 @@ class GarminLoginIn(BaseModel):
     mfa_code: str | None = None
 
 
+class GarminTokenIn(BaseModel):
+    """An OAuth token blob issued by a previous Garmin login."""
+
+    token: str = Field(min_length=1)
+
+
 class GarminStatus(BaseModel):
     authenticated: bool
     profile_name: str | None = None

@@ -191,6 +191,11 @@ export const api = {
   garminStatus: () => request<GarminStatus>("/api/garmin/status"),
   garminLogin: (body: { email: string; password: string; mfa_code?: string | null }) =>
     request<GarminStatus>("/api/garmin/login", { method: "POST", body: JSON.stringify(body) }),
+  garminToken: (token: string) =>
+    request<GarminStatus>("/api/garmin/token", {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    }),
   garminLogout: () => request<GarminStatus>("/api/garmin/logout", { method: "POST" }),
 };
 

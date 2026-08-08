@@ -77,7 +77,7 @@ export function EquipmentBrowser({ facets }: { facets: Facets | null }) {
   return (
     <section>
       <SectionTitle>Treine com o que você tem</SectionTitle>
-      <p className="mb-12" style={{ color: "var(--muted)", maxWidth: "var(--measure-prose, 480px)" }}>
+      <p className="prose prose-justify mb-12">
         Escolha um equipamento para ver quais grupos musculares o catálogo
         alcança com ele.
       </p>
@@ -91,7 +91,7 @@ export function EquipmentBrowser({ facets }: { facets: Facets | null }) {
               <button
                 key={item}
                 type="button"
-                className="pill pill-solid"
+                className="pill glass-lift"
                 aria-pressed={equipment === item}
                 onClick={() => setEquipment(equipment === item ? "" : item)}
               >
@@ -107,7 +107,7 @@ export function EquipmentBrowser({ facets }: { facets: Facets | null }) {
                   ? "Carregando"
                   : `${total} exercícios, ${compound.length} compostos entre os ${exercises.length} analisados`}
               </p>
-              <ul className="surface divide-y" style={{ borderColor: "var(--border)" }}>
+              <ul className="card-glass glass-lift myo-card divide-y" style={{ borderColor: "var(--border)" }}>
                 {exercises.slice(0, 40).map((exercise) => (
                   <li key={exercise.id} className="px-4 py-3">
                     <p style={{ fontSize: "var(--text-15)" }}>{exercise.display_name}</p>
@@ -126,7 +126,7 @@ export function EquipmentBrowser({ facets }: { facets: Facets | null }) {
           )}
         </div>
 
-        <aside className="lg:col-span-4 lg:col-start-9">
+        <aside className="card-glass glass-lift myo-card lg:col-span-4 lg:col-start-9 p-6 self-start">
           <p className="eyebrow mb-6">
             {equipment ? `Cobertura: ${equipmentLabel(equipment)}` : "Escolha um equipamento"}
           </p>

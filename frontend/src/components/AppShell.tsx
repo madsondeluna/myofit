@@ -31,10 +31,7 @@ export function AppShell({
 }) {
   return (
     <div className="min-h-screen flex flex-col">
-      <header
-        className="sticky top-0 z-20"
-        style={{ background: "var(--bg)", borderBottom: "var(--hairline) solid var(--border)" }}
-      >
+      <header className="glass glass-deep myo-bar sticky top-0 z-20">
         <div className="mx-auto w-full max-w-6xl px-6 py-6 flex flex-col sm:flex-row sm:items-center gap-6">
           {/* The wordmark is the way home. A button rather than a link because
               navigation here is state, not a URL. */}
@@ -58,7 +55,7 @@ export function AppShell({
               <button
                 key={item.id}
                 type="button"
-                className="pill pill-solid"
+                className="pill glass-lift"
                 aria-current={page === item.id ? "page" : undefined}
                 onClick={() => onNavigate(item.id)}
               >
@@ -71,13 +68,10 @@ export function AppShell({
 
       <main className="flex-1 mx-auto w-full max-w-6xl px-6 pt-12 pb-24">{children}</main>
 
-      <footer
-        className="sticky bottom-0 z-20"
-        style={{ background: "var(--bg)", borderTop: "var(--hairline) solid var(--border)" }}
-      >
+      <footer className="glass glass-deep myo-bar sticky bottom-0 z-20">
         <p
-          className="mx-auto w-full max-w-6xl px-6 py-3"
-          style={{ fontSize: "var(--text-12)", color: "var(--muted)" }}
+          className="mx-auto w-full max-w-6xl px-6 py-3 text-center"
+          style={{ fontSize: "var(--text-12)" }}
         >
           O MyoFit tem finalidade didática. Treinos, cargas e seleção de
           exercícios devem ter acompanhamento de profissional qualificado.
@@ -104,7 +98,7 @@ export function SectionTitle({ children }: { children: ReactNode }) {
 export function Notice({ kind, children }: { kind: "error" | "info"; children: ReactNode }) {
   return (
     <p
-      className="surface px-6 py-3 mb-12"
+      className="card-glass glass-lift myo-card px-6 py-3 mb-12"
       style={{
         fontSize: "var(--text-13)",
         borderColor: kind === "error" ? "var(--status-critical)" : "var(--border)",

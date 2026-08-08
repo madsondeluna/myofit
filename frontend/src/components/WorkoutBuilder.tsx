@@ -91,7 +91,7 @@ function SortableRow({
             not what dragging would accomplish. */}
         <button
           type="button"
-          className="myo-grip"
+          className="pill glass-lift myo-grip"
           aria-label={`Mudar a ordem de ${entry.exercise.display_name}`}
           title="Arraste para mudar a ordem"
           {...attributes}
@@ -108,7 +108,7 @@ function SortableRow({
             {entry.exercise.primary_muscles.map(muscleLabel).join(", ")}
           </p>
         </div>
-        <button type="button" className="pill pill-solid" onClick={onRemove}>
+        <button type="button" className="pill glass-lift" onClick={onRemove}>
           Remover
         </button>
       </div>
@@ -117,7 +117,7 @@ function SortableRow({
         <label className="myo-label">
           <span className="eyebrow">Séries</span>
           <input
-            className="myo-field"
+            className="glass glass-frost glass-sq myo-field"
             type="number"
             min={1}
             max={99}
@@ -128,7 +128,7 @@ function SortableRow({
         <label className="myo-label">
           <span className="eyebrow">Repetições</span>
           <input
-            className="myo-field"
+            className="glass glass-frost glass-sq myo-field"
             type="number"
             min={1}
             max={999}
@@ -139,7 +139,7 @@ function SortableRow({
         <label className="myo-label">
           <span className="eyebrow">Descanso s</span>
           <input
-            className="myo-field"
+            className="glass glass-frost glass-sq myo-field"
             type="number"
             min={0}
             max={3600}
@@ -150,7 +150,7 @@ function SortableRow({
         <label className="myo-label">
           <span className="eyebrow">Carga kg</span>
           <input
-            className="myo-field"
+            className="glass glass-frost glass-sq myo-field"
             type="number"
             min={0}
             max={1000}
@@ -334,17 +334,17 @@ export function WorkoutBuilder({ facets }: { facets: Facets | null }) {
             <label className="myo-label flex-1 min-w-48">
               <span className="eyebrow">Nome</span>
               <input
-                className="myo-field"
+                className="glass glass-frost glass-sq myo-field"
                 value={name}
                 onChange={(event) => setName(event.target.value)}
               />
             </label>
-            <button type="button" className="pill pill-solid" onClick={reset}>
+            <button type="button" className="pill glass-lift" onClick={reset}>
               Novo
             </button>
             <button
               type="button"
-              className="pill pill-solid pill-primary"
+              className="pill glass-lift pill-primary"
               disabled={busy || entries.length === 0}
               onClick={save}
             >
@@ -360,7 +360,7 @@ export function WorkoutBuilder({ facets }: { facets: Facets | null }) {
                   <button
                     key={summary.id}
                     type="button"
-                    className="pill pill-solid"
+                    className="pill glass-lift"
                     aria-pressed={summary.id === workoutId}
                     onClick={() => load(summary.id)}
                   >
@@ -381,7 +381,7 @@ export function WorkoutBuilder({ facets }: { facets: Facets | null }) {
             </p>
           ))}
 
-          <div className="surface mb-12">
+          <div className="card-glass glass-lift myo-card mb-12">
             {entries.length === 0 ? (
               <p className="px-4 py-6" style={{ color: "var(--muted)" }}>
                 Nenhum exercício ainda. Adicione um pelo catálogo.
@@ -426,20 +426,20 @@ export function WorkoutBuilder({ facets }: { facets: Facets | null }) {
           <div className="flex flex-wrap gap-6">
             <button
               type="button"
-              className="pill pill-solid"
+              className="pill glass-lift"
               onClick={() => setShowCatalog((value) => !value)}
             >
               {showCatalog ? "Fechar catálogo" : "Adicionar exercício"}
             </button>
             {workoutId && (
               <>
-                <a className="pill pill-solid" href={api.exportUrl(workoutId)} download>
+                <a className="pill glass-lift" href={api.exportUrl(workoutId)} download>
                   Exportar .FIT
                 </a>
-                <button type="button" className="pill pill-solid" disabled={busy} onClick={sync}>
+                <button type="button" className="pill glass-lift" disabled={busy} onClick={sync}>
                   Enviar ao Garmin
                 </button>
-                <button type="button" className="pill pill-solid" disabled={busy} onClick={remove}>
+                <button type="button" className="pill glass-lift" disabled={busy} onClick={remove}>
                   Excluir
                 </button>
               </>
@@ -451,7 +451,7 @@ export function WorkoutBuilder({ facets }: { facets: Facets | null }) {
           )}
         </div>
 
-        <aside className="lg:col-span-4 lg:col-start-9">
+        <aside className="card-glass glass-lift myo-card lg:col-span-4 lg:col-start-9 p-6 self-start">
           <p className="eyebrow mb-6">Mapa muscular do treino</p>
           <BodyMap load={saved?.muscle_load ?? []} />
           <HeatLegend />

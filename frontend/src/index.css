@@ -75,30 +75,32 @@ body {
 }
 
 /* --- Form field ----------------------------------------------------------
-   The language has no input pattern. Surfaces take radius zero, so the field
-   is square and separated by the 1px hairline, and its padding follows the
-   control-internal steps. */
+   The language has no input pattern, so this composes one from the material:
+   .glass .glass-frost .glass-sq in the markup, and only the type, padding and
+   size here.
+
+   Frost is the right texture for a field. It is the most opaque of the four,
+   the only one that carries grain, and it keeps a value legible over whatever
+   scrolls behind it. Thin or plain glass under body text reads as smudge. */
 
 .myo-field {
-  background: var(--surface);
-  border: var(--hairline) solid var(--border);
-  border-radius: var(--radius-0);
   color: var(--text);
   font-family: var(--font-sans);
   font-size: var(--text-13);
   padding: var(--space-8) var(--space-10);
   width: 100%;
-  transition: border-color var(--duration-3) var(--ease-standard);
-}
-
-.myo-field:hover {
-  border-color: var(--border-hover);
 }
 
 .myo-field:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: -1px;
-  border-color: var(--accent);
+}
+
+/* The select keeps its native arrow. Stripping the appearance would mean
+   supplying one as a background-image, which is the same slot the glass fill
+   occupies, so the material and the indicator cannot both be there. */
+select.myo-field {
+  padding-right: var(--space-4);
 }
 
 /* Gap between a label and its field: control-internal, not layout rhythm. */
@@ -111,30 +113,51 @@ body {
   margin-bottom: var(--space-8);
 }
 
-/* --- Controls ------------------------------------------------------------
-   Controls are .pill .pill-solid, not bare .pill.
+/* --- Page ground ---------------------------------------------------------
+   Glass is the language's control material, and it only works when there is
+   something behind it: the README is explicit that glass over a flat ground
+   shows nothing, which is why .glass-stage exists at all.
 
-   Glass is the language's control material, but glass needs something behind
-   it: the README is explicit that glass over a flat ground shows nothing,
-   which is why .glass-stage exists at all. Every MyoFit surface sits on a flat
-   --bg, so a bare .pill would render as a white edge on a near-white page.
-   .pill-solid is the language's own escape hatch for exactly that case.
+   This fixed layer is that ground. Three very soft radial washes drawn from
+   the slate ramp, wide enough that no edge is visible and the page still
+   reads as plain, but varied enough that a 16px backdrop blur has something
+   to sample. No new colours: every stop is a palette token. */
 
-   Its muted text is right for a chip but not for an action, so the colour is
-   raised to --text here. The rest of the pattern is untouched. */
-
-.pill-solid {
-  color: var(--text);
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60rem 40rem at 12% -10%, var(--slate-200), transparent 60%),
+    radial-gradient(50rem 40rem at 95% 8%, var(--slate-150), transparent 62%),
+    radial-gradient(70rem 50rem at 50% 108%, var(--slate-200), transparent 58%),
+    var(--bg);
 }
 
+/* --- Controls ------------------------------------------------------------
+   Controls are .pill .glass-lift: the glass material, plus the pointer
+   reaction the language defines for it. The glass does not change colour on
+   hover, it rises: the top edge lights, the shadow opens and the surface
+   lifts 2px. Without that the material reads as an image rather than an
+   object.
+
+   The blur radius follows the size of the surface, never preference: 16px on
+   a pill, 32px on a card. A large radius in a low box makes Chrome sample far
+   past the element and paint a ghost block into the first of a row of glass
+   neighbours. */
+
 /* States the language leaves to the application: which control is current,
-   and which is disabled. */
+   and which is disabled. Current is expressed with the hover fill and edge so
+   it stays inside the material rather than turning into a solid chip. */
 
 .pill[aria-current="page"],
 .pill[aria-pressed="true"] {
   color: var(--text);
-  background-color: var(--surface-hover);
-  border-color: var(--border-hover);
+  background-image: var(--glass-fill-hover);
+  border-color: var(--glass-edge-hover);
+  box-shadow: var(--shadow-glass-hover);
 }
 
 .pill:disabled,
@@ -143,25 +166,62 @@ body {
   cursor: not-allowed;
 }
 
+/* A disabled control must not lift under the pointer. */
+.pill:disabled:hover,
+.pill[aria-disabled="true"]:hover {
+  transform: none;
+  box-shadow: var(--shadow-glass-rest);
+}
+
 .pill:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
 /* Only one control per group may carry the accent; here it is the primary
-   action of a screen. */
+   action of a screen. It keeps the lift, so it behaves like its neighbours. */
 .pill-primary {
   color: var(--bg);
   background-image: none;
   background-color: var(--accent);
-  border-color: var(--accent);
+  border-color: var(--glass-edge-accent);
 }
 
 .pill-primary:hover {
   background-image: none;
   background-color: var(--accent);
-  border-color: var(--text);
   color: var(--bg);
+}
+
+/* --- Cards ---------------------------------------------------------------
+   .card-glass is the deeper texture, 32px of blur for a large surface. The
+   language gives it cursor: pointer because on the source site every card is
+   a link; here a list of exercises is not clickable as a whole, so the
+   pointer goes back to default and only the controls inside claim it. */
+
+.myo-card {
+  border-radius: var(--radius-0);
+  cursor: default;
+}
+
+/* --- Full-width chrome ---------------------------------------------------
+   The header and footer are bars that span the viewport, which is the one
+   place .glass-deep is meant for: 56px of blur, enough that the page reading
+   under them dissolves instead of showing through as legible text. */
+
+.myo-bar {
+  border-radius: var(--radius-0);
+}
+
+/* --- Prose ---------------------------------------------------------------
+   Justified by request. The language keeps .prose-justify optional because a
+   narrow column opens rivers between words; these blocks run at the full
+   prose measure, which is where it holds together. */
+
+.myo-prose {
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
 }
 
 /* The wordmark doubles as the way home, so it needs a focus ring and a hover
@@ -188,24 +248,18 @@ body {
    the control was for. */
 
 .myo-grip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: var(--hairline) solid var(--border);
+  /* Carries .pill .glass-lift for the material; this only fixes the shape to
+     a square target, since a pill's horizontal padding would stretch it. */
+  width: 34px;
+  height: 34px;
+  padding: 0;
   border-radius: var(--radius-full);
-  background: var(--surface);
   color: var(--muted);
   cursor: grab;
   touch-action: none;
-  transition:
-    border-color var(--duration-3) var(--ease-standard),
-    color var(--duration-3) var(--ease-standard);
 }
 
 .myo-grip:hover {
-  border-color: var(--border-hover);
   color: var(--text);
 }
 

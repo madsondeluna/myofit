@@ -161,7 +161,7 @@ export function BodyMap({
           <button
             key={candidate}
             type="button"
-            className="pill pill-solid flex-1"
+            className="pill glass-lift flex-1"
             aria-pressed={view === candidate}
             onClick={() => setView(candidate)}
           >

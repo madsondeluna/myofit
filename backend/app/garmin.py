@@ -149,6 +149,42 @@ def login(email: str, password: str, mfa_code: str | None = None,
     return GarminStatus(authenticated=True, profile_name=_full_name(client))
 
 
+def login_with_token(token_blob: str, token_dir: Path | None = None) -> GarminStatus:
+    """Adopt a session token that was issued somewhere else.
+
+    Garmin has no consumer OAuth a third-party app can redirect to: the only
+    way in is the SSO login the mobile app performs, which takes an email and
+    a password. This is the path for someone who would rather not type those
+    into MyoFit. They authenticate wherever they already trust, and paste the
+    resulting token here; MyoFit stores it exactly as it stores one it
+    obtained itself, and never sees the password.
+    """
+    directory = token_dir or DEFAULT_TOKEN_DIR
+    directory.mkdir(parents=True, exist_ok=True)
+
+    blob = token_blob.strip()
+    # The library distinguishes a token blob from a path purely by length.
+    if len(blob) <= 512:
+        return GarminStatus(
+            authenticated=False,
+            detail="that does not look like a Garmin token; paste the whole value",
+        )
+
+    try:
+        from garminconnect import Garmin
+    except ImportError as exc:
+        return GarminStatus(authenticated=False, detail=f"garminconnect is not installed: {exc}")
+
+    try:
+        client = Garmin()
+        client.login(tokenstore=blob)
+        client.garth.dump(str(directory))
+    except Exception as exc:
+        return GarminStatus(authenticated=False, detail=f"token rejected: {exc}")
+
+    return GarminStatus(authenticated=True, profile_name=_full_name(client))
+
+
 def _full_name(client) -> str | None:
     try:
         return client.get_full_name()

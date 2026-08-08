@@ -159,11 +159,23 @@ round-tripping its own output would only prove it is self-consistent.
 
 ## Garmin Connect sync
 
-Sign in on the Garmin page. The password is posted once to exchange it for
-garth OAuth tokens; only the tokens are written to disk, in the directory named
-by `GARMINTOKENS` (default `.garth`, which is gitignored). The password is
-never stored. Accounts with two-factor authentication come back asking for a
-code, which is submitted as a second call.
+Two ways in, because there is no third-party authorisation flow to redirect
+to. Garmin publishes no consumer OAuth: the developer programme covers the
+Health API under an approved agreement and does not reach the workout service,
+and the endpoints MyoFit uses are the ones the mobile app calls, which
+authenticate with an email and a password over SSO. A "connect with Garmin"
+button has nowhere to send the user.
+
+The default path avoids putting a password in MyoFit at all: authenticate
+wherever you already trust, and paste the resulting token. MyoFit adopts it
+exactly as it would one it obtained itself.
+
+The other path posts the credentials once to exchange them for tokens. Only the
+tokens are written to disk, in the directory named by `GARMINTOKENS` (default
+`.garth`, which is gitignored); the password is never stored. Accounts with
+two-factor authentication come back asking for a code, and the pending attempt
+is held in memory for five minutes so the code resumes the login it was issued
+for.
 
 ### Limitations of the unofficial API
 
@@ -238,13 +250,23 @@ for controls, `.surface` for cards, `.eyebrow` for metadata, `.section-header`
 for the top of a screen. Only a form field and the body map are written from
 scratch, because the language has no equivalent for either.
 
-Two deliberate divergences, both recorded in `index.css` beside the rules that
-implement them. Prussian reserves Cormorant Garamond for section titles and the
-wordmark; MyoFit uses Geist at weight 600 for that role, so the interface runs
-on two families rather than three. And controls take `.pill-solid` rather than
-the glass `.pill`: glass needs something behind it to refract, every MyoFit
-surface sits on a flat background, and a bare pill there is a white edge on a
-near-white page.
+Every surface is glass: controls, cards, panels, form fields, and the header
+and footer bars. Each takes the texture its size calls for, which is the
+language's own rule rather than a preference. Pills and cards blur at 16 and
+32 pixels, fields take the frosted texture because it is the most opaque of
+the four and keeps a value legible, and the two full-width bars take
+`.glass-deep` at 56 pixels. Controls carry `.glass-lift`, so under the pointer
+they rise 2px and their top edge lights instead of changing colour.
+
+Glass needs something behind it to refract, and the language says as much:
+over a flat ground it shows nothing. `body::before` supplies that ground, three
+very soft radial washes drawn from the slate ramp, wide enough that no edge is
+visible and the page still reads as plain.
+
+One deliberate divergence, recorded in `index.css` beside the rule that
+implements it: Prussian reserves Cormorant Garamond for section titles and the
+wordmark, and MyoFit uses Geist at weight 600 for that role, so the interface
+runs on two families rather than three.
 
 Layout follows the two vertical axes of the twelve column grid, content on
 column 1 and the body map on column 9, and the three spacing steps of 24, 48

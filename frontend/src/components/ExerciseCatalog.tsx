@@ -72,7 +72,7 @@ export function ExerciseCatalog({
             <label className="myo-label">
               <span className="eyebrow">Buscar</span>
               <input
-                className="myo-field"
+                className="glass glass-frost glass-sq myo-field"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Supino"
@@ -81,7 +81,7 @@ export function ExerciseCatalog({
             <label className="myo-label">
               <span className="eyebrow">Categoria</span>
               <select
-                className="myo-field"
+                className="glass glass-frost glass-sq myo-field"
                 value={category}
                 onChange={(event) => setCategory(event.target.value)}
               >
@@ -96,7 +96,7 @@ export function ExerciseCatalog({
             <label className="myo-label">
               <span className="eyebrow">Equipamento</span>
               <select
-                className="myo-field"
+                className="glass glass-frost glass-sq myo-field"
                 value={equipment}
                 onChange={(event) => setEquipment(event.target.value)}
               >
@@ -111,7 +111,7 @@ export function ExerciseCatalog({
             <label className="myo-label">
               <span className="eyebrow">Músculo</span>
               <select
-                className="myo-field"
+                className="glass glass-frost glass-sq myo-field"
                 value={muscle}
                 onChange={(event) => setMuscle(event.target.value as MuscleId | "")}
               >
@@ -129,7 +129,7 @@ export function ExerciseCatalog({
             {loading ? "Carregando" : `${total} exercícios`}
           </p>
 
-          <ul className="surface divide-y" style={{ borderColor: "var(--border)" }}>
+          <ul className="card-glass glass-lift myo-card divide-y" style={{ borderColor: "var(--border)" }}>
             {page?.items.map((exercise) => (
               <li
                 key={exercise.id}
@@ -146,7 +146,7 @@ export function ExerciseCatalog({
                   </p>
                 </div>
                 {onAdd && (
-                  <button type="button" className="pill pill-solid" onClick={() => onAdd(exercise)}>
+                  <button type="button" className="pill glass-lift" onClick={() => onAdd(exercise)}>
                     Adicionar
                   </button>
                 )}
@@ -162,7 +162,7 @@ export function ExerciseCatalog({
           <div className="flex items-center gap-6 mt-12">
             <button
               type="button"
-              className="pill pill-solid"
+              className="pill glass-lift"
               disabled={offset === 0}
               onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
             >
@@ -173,7 +173,7 @@ export function ExerciseCatalog({
             </span>
             <button
               type="button"
-              className="pill pill-solid"
+              className="pill glass-lift"
               disabled={offset + PAGE_SIZE >= total}
               onClick={() => setOffset(offset + PAGE_SIZE)}
             >
@@ -182,7 +182,7 @@ export function ExerciseCatalog({
           </div>
         </div>
 
-        <aside className="lg:col-span-4 lg:col-start-9">
+        <aside className="card-glass glass-lift myo-card lg:col-span-4 lg:col-start-9 p-6 self-start">
           <p className="eyebrow mb-6">
             {preview ? preview.display_name : "Passe o cursor sobre um exercício"}
           </p>
