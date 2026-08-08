@@ -79,21 +79,21 @@ export function GarminSettings() {
 
       {error && <Notice kind="error">{error}</Notice>}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        <div>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="lg:col-span-7">
           {status?.authenticated ? (
             <>
               <p className="mb-6">
                 Conectado{status.profile_name ? ` como ${status.profile_name}` : ""}.
               </p>
-              <button type="button" className="myo-btn" disabled={busy} onClick={signOut}>
+              <button type="button" className="pill pill-solid" disabled={busy} onClick={signOut}>
                 Sair
               </button>
             </>
           ) : (
             <form onSubmit={submit}>
-              <label className="block mb-6">
-                <span className="myo-eyebrow block mb-2">E-mail</span>
+              <label className="myo-label mb-6">
+                <span className="eyebrow">E-mail</span>
                 <input
                   className="myo-field"
                   type="email"
@@ -103,8 +103,8 @@ export function GarminSettings() {
                   onChange={(event) => setEmail(event.target.value)}
                 />
               </label>
-              <label className="block mb-6">
-                <span className="myo-eyebrow block mb-2">Senha</span>
+              <label className="myo-label mb-6">
+                <span className="eyebrow">Senha</span>
                 <input
                   className="myo-field"
                   type="password"
@@ -115,8 +115,8 @@ export function GarminSettings() {
                 />
               </label>
               {needsMfa && (
-                <label className="block mb-6">
-                  <span className="myo-eyebrow block mb-2">Código de verificação</span>
+                <label className="myo-label mb-6">
+                  <span className="eyebrow">Código de verificação</span>
                   <input
                     className="myo-field"
                     inputMode="numeric"
@@ -125,21 +125,21 @@ export function GarminSettings() {
                   />
                 </label>
               )}
-              <button type="submit" className="myo-btn myo-btn-accent" disabled={busy}>
+              <button type="submit" className="pill pill-solid pill-primary" disabled={busy}>
                 {busy ? "Entrando" : "Entrar"}
               </button>
             </form>
           )}
         </div>
 
-        <div style={{ maxWidth: "var(--measure-prose, 480px)" }}>
-          <p className="myo-eyebrow mb-3">Como funciona</p>
+        <div className="lg:col-span-4 lg:col-start-9" style={{ maxWidth: "var(--measure-prose)" }}>
+          <p className="eyebrow mb-3">Como funciona</p>
           <p className="mb-6" style={{ fontSize: "var(--text-13)", color: "var(--muted)" }}>
             A senha é enviada uma vez para trocar por tokens de sessão. Só os
             tokens são gravados em disco, no diretório indicado por
             GARMINTOKENS. A senha em si nunca é armazenada.
           </p>
-          <p className="myo-eyebrow mb-3">Limitações</p>
+          <p className="eyebrow mb-3">Limitações</p>
           <p style={{ fontSize: "var(--text-13)", color: "var(--muted)" }}>
             O Garmin não publica API de treinos. O MyoFit usa os mesmos
             endpoints internos do site, pela biblioteca garminconnect, e o

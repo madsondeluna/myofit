@@ -161,13 +161,8 @@ export function BodyMap({
           <button
             key={candidate}
             type="button"
-            className="myo-btn flex-1"
+            className="pill pill-solid flex-1"
             aria-pressed={view === candidate}
-            style={
-              view === candidate
-                ? { background: "var(--surface-hover)", borderColor: "var(--border-hover)" }
-                : undefined
-            }
             onClick={() => setView(candidate)}
           >
             {candidate === "front" ? "Frente" : "Costas"}
@@ -202,14 +197,14 @@ export function BodyMap({
 /** Ramp legend. Shown under the aggregate map so the steps are readable. */
 export function HeatLegend() {
   return (
-    <div className="flex items-center gap-3 mt-6">
-      <span className="myo-eyebrow">Menos</span>
+    <div className="flex items-center gap-6 mt-6">
+      <span className="eyebrow">Menos</span>
       <div className="flex flex-1 h-2 max-w-40">
         {[1, 2, 3, 4, 5, 6, 7].map((step) => (
           <div key={step} className="flex-1" style={{ background: `var(--heat-${step})` }} />
         ))}
       </div>
-      <span className="myo-eyebrow">Mais</span>
+      <span className="eyebrow">Mais</span>
     </div>
   );
 }

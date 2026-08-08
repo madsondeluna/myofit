@@ -66,11 +66,11 @@ export function ExerciseCatalog({
       <SectionTitle>Catálogo de exercícios</SectionTitle>
       {error && <Notice kind="error">{error}</Notice>}
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-12">
-        <div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
-            <label className="block">
-              <span className="myo-eyebrow block mb-2">Buscar</span>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="lg:col-span-7">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
+            <label className="myo-label">
+              <span className="eyebrow">Buscar</span>
               <input
                 className="myo-field"
                 value={query}
@@ -78,8 +78,8 @@ export function ExerciseCatalog({
                 placeholder="Supino"
               />
             </label>
-            <label className="block">
-              <span className="myo-eyebrow block mb-2">Categoria</span>
+            <label className="myo-label">
+              <span className="eyebrow">Categoria</span>
               <select
                 className="myo-field"
                 value={category}
@@ -93,8 +93,8 @@ export function ExerciseCatalog({
                 ))}
               </select>
             </label>
-            <label className="block">
-              <span className="myo-eyebrow block mb-2">Equipamento</span>
+            <label className="myo-label">
+              <span className="eyebrow">Equipamento</span>
               <select
                 className="myo-field"
                 value={equipment}
@@ -108,8 +108,8 @@ export function ExerciseCatalog({
                 ))}
               </select>
             </label>
-            <label className="block">
-              <span className="myo-eyebrow block mb-2">Músculo</span>
+            <label className="myo-label">
+              <span className="eyebrow">Músculo</span>
               <select
                 className="myo-field"
                 value={muscle}
@@ -125,11 +125,11 @@ export function ExerciseCatalog({
             </label>
           </div>
 
-          <p className="myo-eyebrow mb-6">
+          <p className="eyebrow mb-6">
             {loading ? "Carregando" : `${total} exercícios`}
           </p>
 
-          <ul className="myo-card divide-y" style={{ borderColor: "var(--border)" }}>
+          <ul className="surface divide-y" style={{ borderColor: "var(--border)" }}>
             {page?.items.map((exercise) => (
               <li
                 key={exercise.id}
@@ -140,13 +140,13 @@ export function ExerciseCatalog({
               >
                 <div className="min-w-0 flex-1">
                   <p style={{ fontSize: "var(--text-15)" }}>{exercise.display_name}</p>
-                  <p className="myo-mono mt-1" style={{ color: "var(--muted)" }}>
+                  <p className="mono mt-1" style={{ color: "var(--muted)", fontSize: "var(--text-12)" }}>
                     {exercise.primary_muscles.map(muscleLabel).join(", ") || "Sem dados musculares"}
                     {exercise.is_compound ? " · composto" : ""}
                   </p>
                 </div>
                 {onAdd && (
-                  <button type="button" className="myo-btn" onClick={() => onAdd(exercise)}>
+                  <button type="button" className="pill pill-solid" onClick={() => onAdd(exercise)}>
                     Adicionar
                   </button>
                 )}
@@ -159,21 +159,21 @@ export function ExerciseCatalog({
             )}
           </ul>
 
-          <div className="flex items-center gap-4 mt-6">
+          <div className="flex items-center gap-6 mt-12">
             <button
               type="button"
-              className="myo-btn"
+              className="pill pill-solid"
               disabled={offset === 0}
               onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
             >
               Anterior
             </button>
-            <span className="myo-mono" style={{ color: "var(--muted)" }}>
+            <span className="mono" style={{ color: "var(--muted)", fontSize: "var(--text-12)" }}>
               {currentPage} / {pageCount}
             </span>
             <button
               type="button"
-              className="myo-btn"
+              className="pill pill-solid"
               disabled={offset + PAGE_SIZE >= total}
               onClick={() => setOffset(offset + PAGE_SIZE)}
             >
@@ -182,8 +182,8 @@ export function ExerciseCatalog({
           </div>
         </div>
 
-        <aside>
-          <p className="myo-eyebrow mb-6">
+        <aside className="lg:col-span-4 lg:col-start-9">
+          <p className="eyebrow mb-6">
             {preview ? preview.display_name : "Passe o cursor sobre um exercício"}
           </p>
           <BodyMap
@@ -194,11 +194,11 @@ export function ExerciseCatalog({
           />
           {preview && (
             <dl className="mt-6" style={{ fontSize: "var(--text-13)" }}>
-              <dt className="myo-eyebrow">Primários</dt>
+              <dt className="eyebrow">Primários</dt>
               <dd className="mb-3">
                 {preview.primary_muscles.map(muscleLabel).join(", ") || "Nenhum"}
               </dd>
-              <dt className="myo-eyebrow">Secundários</dt>
+              <dt className="eyebrow">Secundários</dt>
               <dd>{preview.secondary_muscles.map(muscleLabel).join(", ") || "Nenhum"}</dd>
             </dl>
           )}

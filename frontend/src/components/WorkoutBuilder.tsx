@@ -29,7 +29,7 @@ import type { Exercise, Facets, Workout, WorkoutSummary } from "../api";
 import { DEFAULT_PRESCRIPTION, api, muscleLabel } from "../api";
 import { BodyMap, HeatLegend } from "./BodyMap";
 import { ExerciseCatalog } from "./ExerciseCatalog";
-import { Notice, SectionTitle } from "./AppShell";
+import { GripIcon, Notice, SectionTitle } from "./AppShell";
 
 /** One row of the editable list, before it is sent to the API. */
 interface DraftEntry {
@@ -58,11 +58,14 @@ function toDraft(workout: Workout): DraftEntry[] {
 
 function SortableRow({
   entry,
+  position,
   onChange,
   onRemove,
   warning,
 }: {
   entry: DraftEntry;
+  /** One-based place in the list, shown so the order is readable at rest. */
+  position: number;
   onChange: (patch: Partial<DraftEntry>) => void;
   onRemove: () => void;
   warning?: string;
@@ -83,29 +86,36 @@ function SortableRow({
       className="px-4 py-4 border-b"
     >
       <div className="flex flex-wrap items-start gap-x-4 gap-y-2">
+        {/* Grip, with the purpose in the accessible name and the tooltip.
+            The previous label said "arrastar", which named the gesture but
+            not what dragging would accomplish. */}
         <button
           type="button"
-          className="myo-btn cursor-grab touch-none"
-          aria-label={`Reordenar ${entry.exercise.display_name}`}
+          className="myo-grip"
+          aria-label={`Mudar a ordem de ${entry.exercise.display_name}`}
+          title="Arraste para mudar a ordem"
           {...attributes}
           {...listeners}
         >
-          Arrastar
+          <GripIcon />
         </button>
         <div className="min-w-0 flex-1">
-          <p style={{ fontSize: "var(--text-15)" }}>{entry.exercise.display_name}</p>
-          <p className="myo-mono" style={{ color: "var(--muted)" }}>
+          <p style={{ fontSize: "var(--text-15)" }}>
+            <span className="eyebrow mr-2">{position}</span>
+            {entry.exercise.display_name}
+          </p>
+          <p className="mono" style={{ color: "var(--muted)", fontSize: "var(--text-12)" }}>
             {entry.exercise.primary_muscles.map(muscleLabel).join(", ")}
           </p>
         </div>
-        <button type="button" className="myo-btn" onClick={onRemove}>
+        <button type="button" className="pill pill-solid" onClick={onRemove}>
           Remover
         </button>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
-        <label className="block">
-          <span className="myo-eyebrow block mb-2">Séries</span>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mt-6">
+        <label className="myo-label">
+          <span className="eyebrow">Séries</span>
           <input
             className="myo-field"
             type="number"
@@ -115,8 +125,8 @@ function SortableRow({
             onChange={(event) => onChange({ sets: Number(event.target.value) })}
           />
         </label>
-        <label className="block">
-          <span className="myo-eyebrow block mb-2">Repetições</span>
+        <label className="myo-label">
+          <span className="eyebrow">Repetições</span>
           <input
             className="myo-field"
             type="number"
@@ -126,8 +136,8 @@ function SortableRow({
             onChange={(event) => onChange({ reps: Number(event.target.value) })}
           />
         </label>
-        <label className="block">
-          <span className="myo-eyebrow block mb-2">Descanso s</span>
+        <label className="myo-label">
+          <span className="eyebrow">Descanso s</span>
           <input
             className="myo-field"
             type="number"
@@ -137,8 +147,8 @@ function SortableRow({
             onChange={(event) => onChange({ rest_seconds: Number(event.target.value) })}
           />
         </label>
-        <label className="block">
-          <span className="myo-eyebrow block mb-2">Carga kg</span>
+        <label className="myo-label">
+          <span className="eyebrow">Carga kg</span>
           <input
             className="myo-field"
             type="number"
@@ -154,7 +164,7 @@ function SortableRow({
       </div>
 
       {warning && (
-        <p className="mt-3" style={{ fontSize: "var(--text-12)", color: "var(--status-warning)" }}>
+        <p className="status status-warning mt-6" style={{ fontSize: "var(--text-12)" }}>
           {warning}
         </p>
       )}
@@ -318,23 +328,23 @@ export function WorkoutBuilder({ facets }: { facets: Facets | null }) {
       {error && <Notice kind="error">{error}</Notice>}
       {status && <Notice kind="info">{status}</Notice>}
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-12">
-        <div>
-          <div className="flex flex-wrap gap-4 items-end mb-6">
-            <label className="block flex-1 min-w-48">
-              <span className="myo-eyebrow block mb-2">Nome</span>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="lg:col-span-7">
+          <div className="flex flex-wrap gap-6 items-end mb-12">
+            <label className="myo-label flex-1 min-w-48">
+              <span className="eyebrow">Nome</span>
               <input
                 className="myo-field"
                 value={name}
                 onChange={(event) => setName(event.target.value)}
               />
             </label>
-            <button type="button" className="myo-btn" onClick={reset}>
+            <button type="button" className="pill pill-solid" onClick={reset}>
               Novo
             </button>
             <button
               type="button"
-              className="myo-btn myo-btn-accent"
+              className="pill pill-solid pill-primary"
               disabled={busy || entries.length === 0}
               onClick={save}
             >
@@ -344,18 +354,14 @@ export function WorkoutBuilder({ facets }: { facets: Facets | null }) {
 
           {summaries.length > 0 && (
             <div className="mb-6">
-              <span className="myo-eyebrow block mb-2">Treinos salvos</span>
-              <div className="flex flex-wrap gap-2">
+              <span className="eyebrow block mb-2">Treinos salvos</span>
+              <div className="myo-rail">
                 {summaries.map((summary) => (
                   <button
                     key={summary.id}
                     type="button"
-                    className="myo-btn"
-                    style={
-                      summary.id === workoutId
-                        ? { background: "var(--surface-hover)", borderColor: "var(--border-hover)" }
-                        : undefined
-                    }
+                    className="pill pill-solid"
+                    aria-pressed={summary.id === workoutId}
                     onClick={() => load(summary.id)}
                   >
                     {summary.name} ({summary.exercise_count})
@@ -375,7 +381,7 @@ export function WorkoutBuilder({ facets }: { facets: Facets | null }) {
             </p>
           ))}
 
-          <div className="myo-card mb-6">
+          <div className="surface mb-12">
             {entries.length === 0 ? (
               <p className="px-4 py-6" style={{ color: "var(--muted)" }}>
                 Nenhum exercício ainda. Adicione um pelo catálogo.
@@ -395,6 +401,7 @@ export function WorkoutBuilder({ facets }: { facets: Facets | null }) {
                       <SortableRow
                         key={entry.key}
                         entry={entry}
+                        position={index + 1}
                         warning={dirty ? undefined : warningFor(index)}
                         onChange={(patch) =>
                           setEntries((current) =>
@@ -416,23 +423,23 @@ export function WorkoutBuilder({ facets }: { facets: Facets | null }) {
             )}
           </div>
 
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap gap-6">
             <button
               type="button"
-              className="myo-btn"
+              className="pill pill-solid"
               onClick={() => setShowCatalog((value) => !value)}
             >
               {showCatalog ? "Fechar catálogo" : "Adicionar exercício"}
             </button>
             {workoutId && (
               <>
-                <a className="myo-btn" href={api.exportUrl(workoutId)} download>
+                <a className="pill pill-solid" href={api.exportUrl(workoutId)} download>
                   Exportar .FIT
                 </a>
-                <button type="button" className="myo-btn" disabled={busy} onClick={sync}>
+                <button type="button" className="pill pill-solid" disabled={busy} onClick={sync}>
                   Enviar ao Garmin
                 </button>
-                <button type="button" className="myo-btn" disabled={busy} onClick={remove}>
+                <button type="button" className="pill pill-solid" disabled={busy} onClick={remove}>
                   Excluir
                 </button>
               </>
@@ -440,12 +447,12 @@ export function WorkoutBuilder({ facets }: { facets: Facets | null }) {
           </div>
 
           {dirty && entries.length > 0 && (
-            <p className="myo-eyebrow mt-4">Alterações não salvas. Salve para atualizar o mapa muscular.</p>
+            <p className="eyebrow mt-6">Alterações não salvas. Salve para atualizar o mapa muscular.</p>
           )}
         </div>
 
-        <aside>
-          <p className="myo-eyebrow mb-6">Mapa muscular do treino</p>
+        <aside className="lg:col-span-4 lg:col-start-9">
+          <p className="eyebrow mb-6">Mapa muscular do treino</p>
           <BodyMap load={saved?.muscle_load ?? []} />
           <HeatLegend />
           {saved && saved.muscle_load.length > 0 && (
@@ -453,7 +460,7 @@ export function WorkoutBuilder({ facets }: { facets: Facets | null }) {
               {saved.muscle_load.slice(0, 8).map((entry) => (
                 <li key={entry.muscle} className="flex justify-between gap-4 py-1">
                   <span>{muscleLabel(entry.muscle)}</span>
-                  <span className="myo-mono" style={{ color: "var(--muted)" }}>
+                  <span className="mono" style={{ color: "var(--muted)", fontSize: "var(--text-12)" }}>
                     {entry.score}
                   </span>
                 </li>

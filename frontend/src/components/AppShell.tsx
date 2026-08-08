@@ -10,6 +10,9 @@ import type { ReactNode } from "react";
 
 export type PageId = "builder" | "catalog" | "equipment" | "settings";
 
+/** The page the wordmark returns to. */
+export const HOME_PAGE: PageId = "builder";
+
 const NAV: { id: PageId; label: string }[] = [
   { id: "builder", label: "Treinos" },
   { id: "catalog", label: "Exercícios" },
@@ -30,27 +33,33 @@ export function AppShell({
     <div className="min-h-screen flex flex-col">
       <header
         className="sticky top-0 z-20"
-        style={{ background: "var(--bg)", borderBottom: "1px solid var(--border)" }}
+        style={{ background: "var(--bg)", borderBottom: "var(--hairline) solid var(--border)" }}
       >
-        <div className="mx-auto w-full max-w-6xl px-6 py-6 flex flex-wrap items-baseline gap-x-6 gap-y-3">
-          <span className="myo-display" style={{ fontSize: "var(--text-32)" }}>
+        <div className="mx-auto w-full max-w-6xl px-6 py-6 flex flex-col sm:flex-row sm:items-center gap-6">
+          {/* The wordmark is the way home. A button rather than a link because
+              navigation here is state, not a URL. */}
+          <button
+            type="button"
+            className="myo-home myo-display self-start"
+            style={{ fontSize: "var(--text-24)" }}
+            onClick={() => onNavigate(HOME_PAGE)}
+            aria-label="MyoFit, voltar ao início"
+          >
             MyoFit
-          </span>
-          <nav className="flex flex-wrap gap-2 ml-auto">
+          </button>
+
+          {/* A rail rather than a wrapping row: on a phone four pills do not
+              fit on one line, and wrapping them pushes the page down. The
+              negative margin lets the rail bleed to the screen edge, so a
+              pill scrolled out of view leaves the page rather than being cut
+              off inside the gutter. */}
+          <nav className="myo-rail sm:ml-auto -mx-6 px-6 sm:mx-0 sm:px-0">
             {NAV.map((item) => (
               <button
                 key={item.id}
                 type="button"
-                className="myo-btn"
+                className="pill pill-solid"
                 aria-current={page === item.id ? "page" : undefined}
-                style={
-                  page === item.id
-                    ? {
-                        background: "var(--surface-hover)",
-                        borderColor: "var(--border-hover)",
-                      }
-                    : undefined
-                }
                 onClick={() => onNavigate(item.id)}
               >
                 {item.label}
@@ -64,7 +73,7 @@ export function AppShell({
 
       <footer
         className="sticky bottom-0 z-20"
-        style={{ background: "var(--bg)", borderTop: "1px solid var(--border)" }}
+        style={{ background: "var(--bg)", borderTop: "var(--hairline) solid var(--border)" }}
       >
         <p
           className="mx-auto w-full max-w-6xl px-6 py-3"
@@ -78,19 +87,24 @@ export function AppShell({
   );
 }
 
-/** Section title. The only place the display weight is used. */
+/**
+ * Section title with the hairline rule under it. Uses Prussian's
+ * .section-header so every screen opens with the same spacing.
+ */
 export function SectionTitle({ children }: { children: ReactNode }) {
   return (
-    <h2 className="myo-display mb-6" style={{ fontSize: "var(--text-32)" }}>
-      {children}
-    </h2>
+    <header className="section-header">
+      <h2 className="myo-display" style={{ fontSize: "var(--text-32)" }}>
+        {children}
+      </h2>
+    </header>
   );
 }
 
 export function Notice({ kind, children }: { kind: "error" | "info"; children: ReactNode }) {
   return (
     <p
-      className="myo-card px-4 py-3 mb-6"
+      className="surface px-6 py-3 mb-12"
       style={{
         fontSize: "var(--text-13)",
         borderColor: kind === "error" ? "var(--status-critical)" : "var(--border)",
@@ -100,5 +114,19 @@ export function Notice({ kind, children }: { kind: "error" | "info"; children: R
     >
       {children}
     </p>
+  );
+}
+
+/**
+ * The six-dot grip that marks a reorderable row. Drawn rather than labelled:
+ * the word "arrastar" named the gesture without saying what the control did.
+ */
+export function GripIcon() {
+  return (
+    <svg width="10" height="16" viewBox="0 0 10 16" aria-hidden="true" focusable="false">
+      {[3, 8, 13].map((y) =>
+        [2, 8].map((x) => <circle key={`${x}-${y}`} cx={x} cy={y} r="1.4" fill="currentColor" />),
+      )}
+    </svg>
   );
 }

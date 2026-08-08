@@ -84,20 +84,15 @@ export function EquipmentBrowser({ facets }: { facets: Facets | null }) {
 
       {error && <Notice kind="error">{error}</Notice>}
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-12">
-        <div>
-          <div className="flex flex-wrap gap-2 mb-12">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="lg:col-span-7">
+          <div className="myo-rail mb-12">
             {facets?.equipment.map((item) => (
               <button
                 key={item}
                 type="button"
-                className="myo-btn"
+                className="pill pill-solid"
                 aria-pressed={equipment === item}
-                style={
-                  equipment === item
-                    ? { background: "var(--surface-hover)", borderColor: "var(--border-hover)" }
-                    : undefined
-                }
                 onClick={() => setEquipment(equipment === item ? "" : item)}
               >
                 {equipmentLabel(item)}
@@ -107,23 +102,23 @@ export function EquipmentBrowser({ facets }: { facets: Facets | null }) {
 
           {equipment && (
             <>
-              <p className="myo-eyebrow mb-6">
+              <p className="eyebrow mb-6">
                 {loading
                   ? "Carregando"
                   : `${total} exercícios, ${compound.length} compostos entre os ${exercises.length} analisados`}
               </p>
-              <ul className="myo-card divide-y" style={{ borderColor: "var(--border)" }}>
+              <ul className="surface divide-y" style={{ borderColor: "var(--border)" }}>
                 {exercises.slice(0, 40).map((exercise) => (
                   <li key={exercise.id} className="px-4 py-3">
                     <p style={{ fontSize: "var(--text-15)" }}>{exercise.display_name}</p>
-                    <p className="myo-mono" style={{ color: "var(--muted)" }}>
+                    <p className="mono" style={{ color: "var(--muted)", fontSize: "var(--text-12)" }}>
                       {exercise.primary_muscles.map(muscleLabel).join(", ") || "Sem dados musculares"}
                     </p>
                   </li>
                 ))}
               </ul>
               {exercises.length > 40 && (
-                <p className="myo-eyebrow mt-4">
+                <p className="eyebrow mt-6">
                   Mostrando os 40 primeiros. Use o catálogo para filtrar mais.
                 </p>
               )}
@@ -131,8 +126,8 @@ export function EquipmentBrowser({ facets }: { facets: Facets | null }) {
           )}
         </div>
 
-        <aside>
-          <p className="myo-eyebrow mb-6">
+        <aside className="lg:col-span-4 lg:col-start-9">
+          <p className="eyebrow mb-6">
             {equipment ? `Cobertura: ${equipmentLabel(equipment)}` : "Escolha um equipamento"}
           </p>
           <BodyMap load={load} />

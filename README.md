@@ -233,10 +233,23 @@ The application ships in the light mode, Prussian's default. The layout is
 responsive: on a narrow viewport the two anatomical views collapse behind a
 front and back toggle and the side panels stack under the main column.
 
-One deliberate divergence from the language: Prussian reserves Cormorant
-Garamond for section titles and the wordmark. MyoFit uses Geist at weight 600
-for that role instead, so the interface runs on two families rather than three.
-It is recorded in `index.css` next to the rule that implements it.
+Components come from `patterns.css` wherever the language ships one: `.pill`
+for controls, `.surface` for cards, `.eyebrow` for metadata, `.section-header`
+for the top of a screen. Only a form field and the body map are written from
+scratch, because the language has no equivalent for either.
+
+Two deliberate divergences, both recorded in `index.css` beside the rules that
+implement them. Prussian reserves Cormorant Garamond for section titles and the
+wordmark; MyoFit uses Geist at weight 600 for that role, so the interface runs
+on two families rather than three. And controls take `.pill-solid` rather than
+the glass `.pill`: glass needs something behind it to refract, every MyoFit
+surface sits on a flat background, and a bare pill there is a white edge on a
+near-white page.
+
+Layout follows the two vertical axes of the twelve column grid, content on
+column 1 and the body map on column 9, and the three spacing steps of 24, 48
+and 96. Smaller values appear only inside a control, between a label and its
+field.
 
 The interface is in Portuguese. The muscle and equipment enum values stay in
 English because they are the contract with the API, the database and the SVG

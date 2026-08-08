@@ -11,7 +11,17 @@
   this file, so a future session can diff the copies against the source repo
   and know that any difference is drift to be corrected, not a local change.
 
+  Components come from patterns.css wherever it has one: .pill for controls,
+  .surface for cards, .eyebrow for metadata, .hairline-grid for lists. Only a
+  form field and the body map are added below, because the language ships no
+  equivalent for either.
+
   MyoFit ships in the light mode (:root), Prussian's default.
+
+  Layout rhythm uses the three declared steps and nothing else: 24px inside a
+  block, 48px between blocks, 96px between sections. In Tailwind those are
+  exactly 6, 12 and 24. Values below 24 appear only inside a control, between
+  a label and its field, which the language sanctions as control-internal.
 */
 
 :root {
@@ -38,14 +48,6 @@
   --muscle-outline: var(--border);
 }
 
-:root.dark {
-  --muscle-idle: var(--graphite-850);
-}
-
-:root.deep-blue {
-  --muscle-idle: var(--slate-800);
-}
-
 html,
 body,
 #root {
@@ -55,106 +57,193 @@ body,
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: var(--font-sans, "Geist", system-ui, sans-serif);
+  font-family: var(--font-sans);
   font-size: var(--text-15);
   -webkit-font-smoothing: antialiased;
 }
-
-/* --- Type roles ---------------------------------------------------------
-   Three families, three jobs. Section titles are the only place Cormorant
-   appears, and it never goes below --text-32. */
 
 /* Section titles and the wordmark. Prussian reserves Cormorant Garamond for
    this role; MyoFit uses Geist at 600 instead, so the interface runs on two
    families rather than three. Recorded here because it is a deliberate
    divergence from the language, not an oversight. */
 .myo-display {
-  font-family: var(--font-sans, "Geist", system-ui, sans-serif);
+  font-family: var(--font-sans);
   font-weight: 600;
-  letter-spacing: var(--tracking-display, -0.02em);
-  line-height: var(--leading-none, 1);
+  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-none);
+  color: var(--text);
 }
 
-.myo-mono {
-  font-family: var(--font-mono, "Geist Mono", ui-monospace, monospace);
-  font-size: var(--text-12);
-}
-
-.myo-eyebrow {
-  font-family: var(--font-mono, "Geist Mono", ui-monospace, monospace);
-  font-size: var(--text-12);
-  letter-spacing: var(--tracking-eyebrow, 0.12em);
-  color: var(--muted);
-}
-
-/* --- Form controls ------------------------------------------------------
-   One size per control class: controls are --text-12. Surfaces take radius
-   zero, so inputs and cards are square and separated by a 1px hairline. */
+/* --- Form field ----------------------------------------------------------
+   The language has no input pattern. Surfaces take radius zero, so the field
+   is square and separated by the 1px hairline, and its padding follows the
+   control-internal steps. */
 
 .myo-field {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 0;
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-0);
   color: var(--text);
-  font-size: var(--text-12);
-  padding: 8px 10px;
+  font-family: var(--font-sans);
+  font-size: var(--text-13);
+  padding: var(--space-8) var(--space-10);
   width: 100%;
-  transition: border-color var(--duration-3, 200ms) var(--ease-standard, ease);
+  transition: border-color var(--duration-3) var(--ease-standard);
 }
 
-.myo-field:focus {
+.myo-field:hover {
+  border-color: var(--border-hover);
+}
+
+.myo-field:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: -1px;
   border-color: var(--accent);
 }
 
-/* Controls take full radius. */
-.myo-btn {
-  border-radius: var(--radius-full, 999px);
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
-  font-size: var(--text-12);
-  padding: 8px 16px;
-  cursor: pointer;
-  transition:
-    background var(--duration-5, 350ms) var(--ease-out-soft, ease),
-    border-color var(--duration-5, 350ms) var(--ease-out-soft, ease);
+/* Gap between a label and its field: control-internal, not layout rhythm. */
+.myo-label {
+  display: block;
 }
 
-.myo-btn:hover:not(:disabled) {
-  background: var(--surface-hover);
+.myo-label > .eyebrow {
+  display: block;
+  margin-bottom: var(--space-8);
+}
+
+/* --- Controls ------------------------------------------------------------
+   Controls are .pill .pill-solid, not bare .pill.
+
+   Glass is the language's control material, but glass needs something behind
+   it: the README is explicit that glass over a flat ground shows nothing,
+   which is why .glass-stage exists at all. Every MyoFit surface sits on a flat
+   --bg, so a bare .pill would render as a white edge on a near-white page.
+   .pill-solid is the language's own escape hatch for exactly that case.
+
+   Its muted text is right for a chip but not for an action, so the colour is
+   raised to --text here. The rest of the pattern is untouched. */
+
+.pill-solid {
+  color: var(--text);
+}
+
+/* States the language leaves to the application: which control is current,
+   and which is disabled. */
+
+.pill[aria-current="page"],
+.pill[aria-pressed="true"] {
+  color: var(--text);
+  background-color: var(--surface-hover);
   border-color: var(--border-hover);
 }
 
-.myo-btn:disabled {
+.pill:disabled,
+.pill[aria-disabled="true"] {
   opacity: 0.45;
   cursor: not-allowed;
 }
 
-.myo-btn-accent {
-  background: var(--accent);
+.pill:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Only one control per group may carry the accent; here it is the primary
+   action of a screen. */
+.pill-primary {
+  color: var(--bg);
+  background-image: none;
+  background-color: var(--accent);
   border-color: var(--accent);
+}
+
+.pill-primary:hover {
+  background-image: none;
+  background-color: var(--accent);
+  border-color: var(--text);
   color: var(--bg);
 }
 
-.myo-btn-accent:hover:not(:disabled) {
-  background: var(--accent);
-  border-color: var(--text);
+/* The wordmark doubles as the way home, so it needs a focus ring and a hover
+   state without taking on a button shape. */
+.myo-home {
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  transition: opacity var(--duration-3) var(--ease-standard);
 }
 
-/* Surfaces: radius zero, hairline separation. */
-.myo-card {
+.myo-home:hover {
+  opacity: 0.7;
+}
+
+.myo-home:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+/* --- Drag handle ---------------------------------------------------------
+   A grip, not a word: the label "drag" named the gesture without saying what
+   the control was for. */
+
+.myo-grip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-full);
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 0;
+  color: var(--muted);
+  cursor: grab;
+  touch-action: none;
+  transition:
+    border-color var(--duration-3) var(--ease-standard),
+    color var(--duration-3) var(--ease-standard);
+}
+
+.myo-grip:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+
+.myo-grip:active {
+  cursor: grabbing;
+}
+
+.myo-grip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* --- Horizontal scroll rail ---------------------------------------------
+   On a phone the navigation and the equipment filters do not fit on one line.
+   Wrapping them pushes the content down; a rail keeps the row one line tall
+   and lets it slide sideways. */
+
+.myo-rail {
+  display: flex;
+  gap: var(--space-8);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.myo-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.myo-rail > * {
+  flex: 0 0 auto;
 }
 
 /* --- Body map ------------------------------------------------------------ */
 
 .myo-figure path,
 .myo-figure g {
-  transition: fill var(--duration-5, 350ms) var(--ease-out-soft, ease);
+  transition: fill var(--duration-5) var(--ease-out-soft);
 }
 
 .myo-base {
@@ -169,6 +258,12 @@ body {
 
 .myo-muscle.is-interactive {
   cursor: pointer;
+}
+
+.myo-muscle.is-interactive:focus-visible {
+  outline: none;
+  stroke: var(--accent);
+  stroke-width: 2;
 }
 
 /* Reduced motion is honoured across the whole app. */
