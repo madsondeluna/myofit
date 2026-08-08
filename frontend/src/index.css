@@ -11,43 +11,31 @@
   this file, so a future session can diff the copies against the source repo
   and know that any difference is drift to be corrected, not a local change.
 
-  MyoFit ships in the graphite dark mode (:root.dark), which is Prussian's
-  neutral dark. The blue dark is :root.deep-blue and is a different mode.
+  MyoFit ships in the light mode (:root), Prussian's default.
 */
 
 :root {
   /*
-    Heat ramp for the body map.
+    Heat ramp for the body map: cool to warm, blue for lightly worked and red
+    for the most worked.
 
-    Prussian's ordinal ramp runs light to dark in the light mode and is
-    re-anchored, not flipped, in the dark modes: there --seq-1 is the lightest
-    step. "Hottest" therefore means the darkest step on a light background and
-    the lightest step on a dark one. These aliases give the body map a single
-    direction to code against, with --heat-7 always the most worked muscle,
-    while leaving the validated ramps untouched.
+    Built from Prussian's diverging ramp, which already runs blue to amber.
+    Its two neutral middle steps (--div-5, --div-6) are skipped on purpose:
+    they sit within a couple of points of the page background, so a muscle at
+    mid intensity would read as unworked. The seven steps kept all clear 3:1
+    against --bg, and hue carries the signal from cool to hot.
   */
-  --heat-1: var(--seq-1);
-  --heat-2: var(--seq-2);
-  --heat-3: var(--seq-3);
-  --heat-4: var(--seq-4);
-  --heat-5: var(--seq-5);
-  --heat-6: var(--seq-6);
-  --heat-7: var(--seq-7);
+  --heat-1: var(--div-4);
+  --heat-2: var(--div-3);
+  --heat-3: var(--div-2);
+  --heat-4: var(--div-1);
+  --heat-5: var(--div-7);
+  --heat-6: var(--div-8);
+  --heat-7: var(--div-9);
 
   /* Muscle groups the current selection does not touch. */
   --muscle-idle: var(--slate-250);
   --muscle-outline: var(--border);
-}
-
-:root.dark,
-:root.deep-blue {
-  --heat-1: var(--seq-7);
-  --heat-2: var(--seq-6);
-  --heat-3: var(--seq-5);
-  --heat-4: var(--seq-4);
-  --heat-5: var(--seq-3);
-  --heat-6: var(--seq-2);
-  --heat-7: var(--seq-1);
 }
 
 :root.dark {
@@ -76,9 +64,13 @@ body {
    Three families, three jobs. Section titles are the only place Cormorant
    appears, and it never goes below --text-32. */
 
+/* Section titles and the wordmark. Prussian reserves Cormorant Garamond for
+   this role; MyoFit uses Geist at 600 instead, so the interface runs on two
+   families rather than three. Recorded here because it is a deliberate
+   divergence from the language, not an oversight. */
 .myo-display {
-  font-family: var(--font-display, "Cormorant Garamond", Georgia, serif);
-  font-weight: 300;
+  font-family: var(--font-sans, "Geist", system-ui, sans-serif);
+  font-weight: 600;
   letter-spacing: var(--tracking-display, -0.02em);
   line-height: var(--leading-none, 1);
 }

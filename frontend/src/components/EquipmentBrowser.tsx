@@ -9,17 +9,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { Exercise, Facets, MuscleId, MuscleLoad } from "../api";
-import { api, muscleLabel } from "../api";
+import { api, equipmentLabel, muscleLabel } from "../api";
 import { BodyMap, HeatLegend } from "./BodyMap";
 import { Notice, SectionTitle } from "./AppShell";
 
 /** Same weighting the backend uses for workouts, so the two maps read alike. */
 const SECONDARY_WEIGHT = 0.5;
-
-function label(value: string): string {
-  const spaced = value.replace(/_/g, " ").toLowerCase();
-  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
-}
 
 /** Count how many catalog exercises reach each muscle with this equipment. */
 function aggregate(exercises: Exercise[]): MuscleLoad[] {
@@ -53,6 +48,7 @@ function aggregate(exercises: Exercise[]): MuscleLoad[] {
 export function EquipmentBrowser({ facets }: { facets: Facets | null }) {
   const [equipment, setEquipment] = useState("");
   const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [total, setTotal] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -68,6 +64,7 @@ export function EquipmentBrowser({ facets }: { facets: Facets | null }) {
       .exercises({ equipment, limit: 200 })
       .then((page) => {
         setExercises(page.items);
+        setTotal(page.total);
         setError(null);
       })
       .catch((err: Error) => setError(err.message))
@@ -79,10 +76,10 @@ export function EquipmentBrowser({ facets }: { facets: Facets | null }) {
 
   return (
     <section>
-      <SectionTitle>Train with what you have</SectionTitle>
+      <SectionTitle>Treine com o que você tem</SectionTitle>
       <p className="mb-12" style={{ color: "var(--muted)", maxWidth: "var(--measure-prose, 480px)" }}>
-        Choose a piece of equipment to see which muscle groups the catalog can
-        reach with it.
+        Escolha um equipamento para ver quais grupos musculares o catálogo
+        alcança com ele.
       </p>
 
       {error && <Notice kind="error">{error}</Notice>}
@@ -103,7 +100,7 @@ export function EquipmentBrowser({ facets }: { facets: Facets | null }) {
                 }
                 onClick={() => setEquipment(equipment === item ? "" : item)}
               >
-                {label(item)}
+                {equipmentLabel(item)}
               </button>
             ))}
           </div>
@@ -112,22 +109,22 @@ export function EquipmentBrowser({ facets }: { facets: Facets | null }) {
             <>
               <p className="myo-eyebrow mb-6">
                 {loading
-                  ? "Loading"
-                  : `${exercises.length} exercises, ${compound.length} compound`}
+                  ? "Carregando"
+                  : `${total} exercícios, ${compound.length} compostos entre os ${exercises.length} analisados`}
               </p>
               <ul className="myo-card divide-y" style={{ borderColor: "var(--border)" }}>
                 {exercises.slice(0, 40).map((exercise) => (
                   <li key={exercise.id} className="px-4 py-3">
                     <p style={{ fontSize: "var(--text-15)" }}>{exercise.display_name}</p>
                     <p className="myo-mono" style={{ color: "var(--muted)" }}>
-                      {exercise.primary_muscles.map(muscleLabel).join(", ") || "No muscle data"}
+                      {exercise.primary_muscles.map(muscleLabel).join(", ") || "Sem dados musculares"}
                     </p>
                   </li>
                 ))}
               </ul>
               {exercises.length > 40 && (
                 <p className="myo-eyebrow mt-4">
-                  Showing the first 40. Use the catalog to filter further.
+                  Mostrando os 40 primeiros. Use o catálogo para filtrar mais.
                 </p>
               )}
             </>
@@ -136,7 +133,7 @@ export function EquipmentBrowser({ facets }: { facets: Facets | null }) {
 
         <aside>
           <p className="myo-eyebrow mb-6">
-            {equipment ? `Coverage: ${label(equipment)}` : "Pick equipment"}
+            {equipment ? `Cobertura: ${equipmentLabel(equipment)}` : "Escolha um equipamento"}
           </p>
           <BodyMap load={load} />
           <HeatLegend />

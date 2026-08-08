@@ -194,8 +194,53 @@ export const api = {
   garminLogout: () => request<GarminStatus>("/api/garmin/logout", { method: "POST" }),
 };
 
-/** quadriceps -> Quadriceps, erector_spinae -> Erector spinae. Sentence case. */
+/**
+ * Muscle names in Portuguese. The enum value stays the contract with the API
+ * and the SVG path ids; only what the user reads is translated.
+ */
+const MUSCLE_LABELS: Record<string, string> = {
+  quadriceps: "Quadríceps",
+  hamstrings: "Isquiotibiais",
+  glutes: "Glúteos",
+  adductors: "Adutores",
+  abductors: "Abdutores",
+  calves: "Panturrilhas",
+  erector_spinae: "Eretores da espinha",
+  lats: "Dorsais",
+  traps: "Trapézio",
+  rhomboids: "Romboides",
+  rear_delts: "Deltoide posterior",
+  front_delts: "Deltoide anterior",
+  side_delts: "Deltoide lateral",
+  chest: "Peitoral",
+  biceps: "Bíceps",
+  triceps: "Tríceps",
+  forearms: "Antebraços",
+  abs: "Abdômen",
+  obliques: "Oblíquos",
+};
+
 export function muscleLabel(muscle: string): string {
-  const spaced = muscle.replace(/_/g, " ");
-  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
+  return MUSCLE_LABELS[muscle] ?? muscle.replace(/_/g, " ");
+}
+
+/** Equipment names in Portuguese, keyed by the backend EquipmentType value. */
+const EQUIPMENT_LABELS: Record<string, string> = {
+  barbell: "Barra",
+  dumbbell: "Halteres",
+  kettlebell: "Kettlebell",
+  cable: "Cabo",
+  machine: "Máquina",
+  smith_machine: "Smith",
+  band: "Elástico",
+  medicine_ball: "Medicine ball",
+  stability_ball: "Bola suíça",
+  suspension: "Suspensão",
+  plate: "Anilha",
+  bodyweight: "Peso do corpo",
+  other: "Outro",
+};
+
+export function equipmentLabel(value: string): string {
+  return EQUIPMENT_LABELS[value] ?? value.replace(/_/g, " ");
 }

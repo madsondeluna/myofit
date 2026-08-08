@@ -46,9 +46,9 @@ export function GarminSettings() {
         // than a distinct status code, since the request itself succeeded.
         if (result.detail?.startsWith("mfa_required")) {
           setNeedsMfa(true);
-          setError("Enter the code Garmin sent you.");
+          setError("Digite o código que o Garmin enviou.");
         } else {
-          setError(result.detail ?? "Sign in failed");
+          setError(result.detail ?? "Falha ao entrar");
         }
       } else {
         setNeedsMfa(false);
@@ -84,16 +84,16 @@ export function GarminSettings() {
           {status?.authenticated ? (
             <>
               <p className="mb-6">
-                Signed in{status.profile_name ? ` as ${status.profile_name}` : ""}.
+                Conectado{status.profile_name ? ` como ${status.profile_name}` : ""}.
               </p>
               <button type="button" className="myo-btn" disabled={busy} onClick={signOut}>
-                Sign out
+                Sair
               </button>
             </>
           ) : (
             <form onSubmit={submit}>
               <label className="block mb-6">
-                <span className="myo-eyebrow block mb-2">Email</span>
+                <span className="myo-eyebrow block mb-2">E-mail</span>
                 <input
                   className="myo-field"
                   type="email"
@@ -104,7 +104,7 @@ export function GarminSettings() {
                 />
               </label>
               <label className="block mb-6">
-                <span className="myo-eyebrow block mb-2">Password</span>
+                <span className="myo-eyebrow block mb-2">Senha</span>
                 <input
                   className="myo-field"
                   type="password"
@@ -116,7 +116,7 @@ export function GarminSettings() {
               </label>
               {needsMfa && (
                 <label className="block mb-6">
-                  <span className="myo-eyebrow block mb-2">Verification code</span>
+                  <span className="myo-eyebrow block mb-2">Código de verificação</span>
                   <input
                     className="myo-field"
                     inputMode="numeric"
@@ -126,25 +126,26 @@ export function GarminSettings() {
                 </label>
               )}
               <button type="submit" className="myo-btn myo-btn-accent" disabled={busy}>
-                {busy ? "Signing in" : "Sign in"}
+                {busy ? "Entrando" : "Entrar"}
               </button>
             </form>
           )}
         </div>
 
         <div style={{ maxWidth: "var(--measure-prose, 480px)" }}>
-          <p className="myo-eyebrow mb-3">How this works</p>
+          <p className="myo-eyebrow mb-3">Como funciona</p>
           <p className="mb-6" style={{ fontSize: "var(--text-13)", color: "var(--muted)" }}>
-            The password is sent once to exchange it for session tokens. Only the
-            tokens are written to disk, in the directory named by GARMINTOKENS.
-            The password itself is never stored.
+            A senha é enviada uma vez para trocar por tokens de sessão. Só os
+            tokens são gravados em disco, no diretório indicado por
+            GARMINTOKENS. A senha em si nunca é armazenada.
           </p>
-          <p className="myo-eyebrow mb-3">Limitations</p>
+          <p className="myo-eyebrow mb-3">Limitações</p>
           <p style={{ fontSize: "var(--text-13)", color: "var(--muted)" }}>
-            Garmin publishes no public workout API. MyoFit uses the same internal
-            endpoints the website does, through the garminconnect library, and
-            Garmin can change them without notice. When a sync fails, the .FIT
-            export still produces a file you can copy to the watch over USB.
+            O Garmin não publica API de treinos. O MyoFit usa os mesmos
+            endpoints internos do site, pela biblioteca garminconnect, e o
+            Garmin pode alterá-los sem aviso. Quando o envio falha, a
+            exportação .FIT continua gerando um arquivo que você copia para o
+            relógio via USB.
           </p>
         </div>
       </div>

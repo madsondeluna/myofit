@@ -281,3 +281,21 @@ def test_sync_without_a_session_reports_cleanly(client, ids):
 def test_garmin_status_without_a_session(client):
     body = client.get("/api/garmin/status").json()
     assert body["authenticated"] is False
+
+
+# --- Static frontend guard -------------------------------------------------
+
+
+def test_unknown_api_path_is_a_404_not_the_spa(client):
+    """A typo'd endpoint must fail as a missing route, not return index.html."""
+    response = client.get("/api/does-not-exist")
+    assert response.status_code == 404
+
+
+def test_spa_fallback_rejects_path_traversal(client):
+    """`..` segments must not reach outside the build directory."""
+    response = client.get("/../../etc/passwd")
+    # Either the route never matches, or it falls back to the SPA. What must
+    # never happen is a file from outside frontend/dist coming back.
+    assert response.status_code in (200, 404)
+    assert b"root:" not in response.content

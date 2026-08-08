@@ -86,26 +86,26 @@ function SortableRow({
         <button
           type="button"
           className="myo-btn cursor-grab touch-none"
-          aria-label={`Reorder ${entry.exercise.display_name}`}
+          aria-label={`Reordenar ${entry.exercise.display_name}`}
           {...attributes}
           {...listeners}
         >
-          Drag
+          Arrastar
         </button>
         <div className="min-w-0 flex-1">
           <p style={{ fontSize: "var(--text-15)" }}>{entry.exercise.display_name}</p>
           <p className="myo-mono" style={{ color: "var(--muted)" }}>
-            {entry.exercise.garmin_category} / {entry.exercise.garmin_exercise_name}
+            {entry.exercise.primary_muscles.map(muscleLabel).join(", ")}
           </p>
         </div>
         <button type="button" className="myo-btn" onClick={onRemove}>
-          Remove
+          Remover
         </button>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
         <label className="block">
-          <span className="myo-eyebrow block mb-2">Sets</span>
+          <span className="myo-eyebrow block mb-2">Séries</span>
           <input
             className="myo-field"
             type="number"
@@ -116,7 +116,7 @@ function SortableRow({
           />
         </label>
         <label className="block">
-          <span className="myo-eyebrow block mb-2">Reps</span>
+          <span className="myo-eyebrow block mb-2">Repetições</span>
           <input
             className="myo-field"
             type="number"
@@ -127,7 +127,7 @@ function SortableRow({
           />
         </label>
         <label className="block">
-          <span className="myo-eyebrow block mb-2">Rest s</span>
+          <span className="myo-eyebrow block mb-2">Descanso s</span>
           <input
             className="myo-field"
             type="number"
@@ -138,7 +138,7 @@ function SortableRow({
           />
         </label>
         <label className="block">
-          <span className="myo-eyebrow block mb-2">Load kg</span>
+          <span className="myo-eyebrow block mb-2">Carga kg</span>
           <input
             className="myo-field"
             type="number"
@@ -165,7 +165,7 @@ function SortableRow({
 export function WorkoutBuilder({ facets }: { facets: Facets | null }) {
   const [summaries, setSummaries] = useState<WorkoutSummary[]>([]);
   const [workoutId, setWorkoutId] = useState<number | null>(null);
-  const [name, setName] = useState("New workout");
+  const [name, setName] = useState("Novo treino");
   const [entries, setEntries] = useState<DraftEntry[]>([]);
   const [saved, setSaved] = useState<Workout | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -204,7 +204,7 @@ export function WorkoutBuilder({ facets }: { facets: Facets | null }) {
 
   const reset = () => {
     setWorkoutId(null);
-    setName("New workout");
+    setName("Novo treino");
     setEntries([]);
     setSaved(null);
     setStatus(null);
@@ -238,7 +238,7 @@ export function WorkoutBuilder({ facets }: { facets: Facets | null }) {
       setWorkoutId(workout.id);
       setSaved(workout);
       setEntries(toDraft(workout));
-      setStatus("Saved");
+      setStatus("Salvo");
       await refreshList();
     } catch (err) {
       setError((err as Error).message);
@@ -268,11 +268,11 @@ export function WorkoutBuilder({ facets }: { facets: Facets | null }) {
     try {
       const result = await api.syncWorkout(workoutId);
       if (result.ok) {
-        setStatus(`Sent to Garmin as workout ${result.garmin_workout_id}`);
+        setStatus(`Enviado ao Garmin como treino ${result.garmin_workout_id}`);
         setError(null);
         await refreshList();
       } else {
-        setError(result.detail ?? "Sync failed");
+        setError(result.detail ?? "Falha no envio");
       }
     } catch (err) {
       setError((err as Error).message);
@@ -314,7 +314,7 @@ export function WorkoutBuilder({ facets }: { facets: Facets | null }) {
 
   return (
     <section>
-      <SectionTitle>Workout builder</SectionTitle>
+      <SectionTitle>Montagem de treino</SectionTitle>
       {error && <Notice kind="error">{error}</Notice>}
       {status && <Notice kind="info">{status}</Notice>}
 
@@ -322,7 +322,7 @@ export function WorkoutBuilder({ facets }: { facets: Facets | null }) {
         <div>
           <div className="flex flex-wrap gap-4 items-end mb-6">
             <label className="block flex-1 min-w-48">
-              <span className="myo-eyebrow block mb-2">Name</span>
+              <span className="myo-eyebrow block mb-2">Nome</span>
               <input
                 className="myo-field"
                 value={name}
@@ -330,7 +330,7 @@ export function WorkoutBuilder({ facets }: { facets: Facets | null }) {
               />
             </label>
             <button type="button" className="myo-btn" onClick={reset}>
-              New
+              Novo
             </button>
             <button
               type="button"
@@ -338,13 +338,13 @@ export function WorkoutBuilder({ facets }: { facets: Facets | null }) {
               disabled={busy || entries.length === 0}
               onClick={save}
             >
-              {busy ? "Working" : "Save"}
+              {busy ? "Salvando" : "Salvar"}
             </button>
           </div>
 
           {summaries.length > 0 && (
             <div className="mb-6">
-              <span className="myo-eyebrow block mb-2">Saved workouts</span>
+              <span className="myo-eyebrow block mb-2">Treinos salvos</span>
               <div className="flex flex-wrap gap-2">
                 {summaries.map((summary) => (
                   <button
@@ -378,7 +378,7 @@ export function WorkoutBuilder({ facets }: { facets: Facets | null }) {
           <div className="myo-card mb-6">
             {entries.length === 0 ? (
               <p className="px-4 py-6" style={{ color: "var(--muted)" }}>
-                No exercises yet. Add one from the catalog.
+                Nenhum exercício ainda. Adicione um pelo catálogo.
               </p>
             ) : (
               <DndContext
@@ -422,30 +422,30 @@ export function WorkoutBuilder({ facets }: { facets: Facets | null }) {
               className="myo-btn"
               onClick={() => setShowCatalog((value) => !value)}
             >
-              {showCatalog ? "Hide catalog" : "Add exercise"}
+              {showCatalog ? "Fechar catálogo" : "Adicionar exercício"}
             </button>
             {workoutId && (
               <>
                 <a className="myo-btn" href={api.exportUrl(workoutId)} download>
-                  Export .FIT
+                  Exportar .FIT
                 </a>
                 <button type="button" className="myo-btn" disabled={busy} onClick={sync}>
-                  Sync to Garmin
+                  Enviar ao Garmin
                 </button>
                 <button type="button" className="myo-btn" disabled={busy} onClick={remove}>
-                  Delete
+                  Excluir
                 </button>
               </>
             )}
           </div>
 
           {dirty && entries.length > 0 && (
-            <p className="myo-eyebrow mt-4">Unsaved changes. Save to refresh the muscle map.</p>
+            <p className="myo-eyebrow mt-4">Alterações não salvas. Salve para atualizar o mapa muscular.</p>
           )}
         </div>
 
         <aside>
-          <p className="myo-eyebrow mb-6">Workout muscle map</p>
+          <p className="myo-eyebrow mb-6">Mapa muscular do treino</p>
           <BodyMap load={saved?.muscle_load ?? []} />
           <HeatLegend />
           {saved && saved.muscle_load.length > 0 && (

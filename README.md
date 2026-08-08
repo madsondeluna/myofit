@@ -110,17 +110,19 @@ as chest work.
 
 ### Muscle map colour
 
-Colours come from the ordinal ramp of the Prussian design language, through
-`--heat-1` to `--heat-7` aliases defined in `frontend/src/index.css`. That ramp
-runs light to dark in the light mode and is re-anchored in the dark modes, where
-the lightest step carries the most weight. The aliases give the map one
-direction to code against, with `--heat-7` always the most worked step, without
-touching the validated ramps.
+The map runs cool to warm: blue for a lightly worked muscle, red for the most
+worked one. The steps are `--heat-1` to `--heat-7` in `frontend/src/index.css`,
+built on the diverging ramp of the Prussian design language, which already runs
+blue to amber.
 
-Intensity maps onto the seven discrete steps rather than interpolating between
-them, because the ramp was validated as seven steps and intermediate values
-would be colours nobody checked. Interface colours are never used for muscles:
-a highlighted muscle must not read as a focus ring.
+Its two neutral middle steps are skipped deliberately. They sit within a couple
+of points of the page background, so a muscle at mid intensity would have read
+as unworked. The seven steps kept all clear 3:1 against the background.
+
+Intensity maps onto those seven discrete steps rather than interpolating
+between them, because the ramp was validated as discrete steps and intermediate
+values would be colours nobody checked. Interface colours are never used for
+muscles: a highlighted muscle must not read as a focus ring.
 
 ### Muscle aggregation
 
@@ -208,10 +210,16 @@ not survive.
 make test
 ```
 
-49 tests covering catalog seeding against the SDK enums, the muscle taxonomy
+51 tests covering catalog seeding against the SDK enums, the muscle taxonomy
 and its SVG coverage, the FIT round trip through the official decoder, workout
-CRUD, reordering, the ordering heuristic, muscle aggregation, and the failure
-path when no Garmin session is stored.
+CRUD, reordering, the ordering heuristic, muscle aggregation, the static file
+guard, and the failure path when no Garmin session is stored.
+
+The Docker image has not been built in this environment, because no Docker
+daemon was available. Its two non-obvious lines were checked another way: the
+`uv` binary path matches the one the official image documents, and
+`uv pip install -r pyproject.toml` was run locally and resolves the full
+dependency set.
 
 ## Design language
 
@@ -221,7 +229,17 @@ The interface follows Prussian. `frontend/src/prussian/` is a vendored copy of
 so the copies can be diffed against the source and any difference read as drift
 to correct.
 
-The application ships in the graphite dark mode, which is Prussian's neutral
-dark. The layout is responsive: on a narrow viewport the two anatomical views
-collapse behind a front and back toggle and the side panels stack under the
-main column.
+The application ships in the light mode, Prussian's default. The layout is
+responsive: on a narrow viewport the two anatomical views collapse behind a
+front and back toggle and the side panels stack under the main column.
+
+One deliberate divergence from the language: Prussian reserves Cormorant
+Garamond for section titles and the wordmark. MyoFit uses Geist at weight 600
+for that role instead, so the interface runs on two families rather than three.
+It is recorded in `index.css` next to the rule that implements it.
+
+The interface is in Portuguese. The muscle and equipment enum values stay in
+English because they are the contract with the API, the database and the SVG
+path ids; only the text a user reads is translated. Garmin exercise identifiers
+are never shown in the interface, though they are what gets written to the FIT
+file and sent to Garmin.

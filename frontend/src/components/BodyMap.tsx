@@ -7,18 +7,17 @@
  *   - heat: a whole workout, each muscle taking a ramp step from its
  *     normalised intensity.
  *
- * Colours come from Prussian's ordinal ramp through the --heat-* aliases
- * defined in index.css, where --heat-7 is always the most worked step in every
- * mode. Interface colours are never used here: a muscle must not read as a
+ * Colours come from the --heat-* aliases in index.css, a cool-to-warm ramp
+ * built on Prussian's diverging palette where --heat-7 is the most worked step. Interface colours are never used here: a muscle must not read as a
  * focus ring, and a focus ring must not read as a worked muscle.
  */
 
 import { useId, useState } from "react";
 import type { MuscleId, MuscleLoad, ViewId } from "../api";
 import { muscleLabel } from "../api";
-import { BASE_HALF, HEAD, MUSCLES_BY_VIEW } from "./figures";
-
-const MIRROR = "matrix(-1 0 0 1 200 0)";
+// Geometry, mirror transform and canvas all come from the figure module, so a
+// change to the drawing cannot leave the renderer on a stale viewBox.
+import { BASE_HALF, HEAD, MIRROR, MUSCLES_BY_VIEW, VIEW_BOX } from "./figures";
 
 /** Ramp step for a primary target and for a supporting one. */
 const PRIMARY_STEP = 7;
@@ -81,14 +80,14 @@ function Figure({ view, fills, onSelect, selected, titleId }: FigureProps) {
 
   return (
     <svg
-      viewBox="0 0 200 440"
+      viewBox={`0 0 ${VIEW_BOX.width} ${VIEW_BOX.height}`}
       className="myo-figure w-full h-auto"
       role="img"
       aria-labelledby={titleId}
       preserveAspectRatio="xMidYMid meet"
     >
       <title id={titleId}>
-        {view === "front" ? "Front view of the body map" : "Back view of the body map"}
+        {view === "front" ? "Mapa corporal, vista frontal" : "Mapa corporal, vista posterior"}
       </title>
 
       {/* Silhouette. Drawn first so muscle shapes sit on top of it. */}
@@ -171,7 +170,7 @@ export function BodyMap({
             }
             onClick={() => setView(candidate)}
           >
-            {candidate === "front" ? "Front" : "Back"}
+            {candidate === "front" ? "Frente" : "Costas"}
           </button>
         ))}
       </div>
@@ -204,13 +203,13 @@ export function BodyMap({
 export function HeatLegend() {
   return (
     <div className="flex items-center gap-3 mt-6">
-      <span className="myo-eyebrow">Less</span>
+      <span className="myo-eyebrow">Menos</span>
       <div className="flex flex-1 h-2 max-w-40">
         {[1, 2, 3, 4, 5, 6, 7].map((step) => (
           <div key={step} className="flex-1" style={{ background: `var(--heat-${step})` }} />
         ))}
       </div>
-      <span className="myo-eyebrow">More</span>
+      <span className="myo-eyebrow">Mais</span>
     </div>
   );
 }

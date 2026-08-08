@@ -18,7 +18,7 @@ export default function App() {
     api
       .facets()
       .then(setFacets)
-      .catch((err: Error) => setError(`Could not reach the API: ${err.message}`));
+      .catch((err: Error) => setError(`Não foi possível acessar a API: ${err.message}`));
   }, []);
 
   return (

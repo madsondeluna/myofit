@@ -6,7 +6,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { Exercise, Facets, MuscleId } from "../api";
-import { api, muscleLabel } from "../api";
+import { api, equipmentLabel, muscleLabel } from "../api";
 import { BodyMap } from "./BodyMap";
 import { Notice, SectionTitle } from "./AppShell";
 
@@ -63,29 +63,29 @@ export function ExerciseCatalog({
 
   return (
     <section>
-      <SectionTitle>Exercise catalog</SectionTitle>
+      <SectionTitle>Catálogo de exercícios</SectionTitle>
       {error && <Notice kind="error">{error}</Notice>}
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-12">
         <div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
             <label className="block">
-              <span className="myo-eyebrow block mb-2">Search</span>
+              <span className="myo-eyebrow block mb-2">Buscar</span>
               <input
                 className="myo-field"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Bench press"
+                placeholder="Supino"
               />
             </label>
             <label className="block">
-              <span className="myo-eyebrow block mb-2">Category</span>
+              <span className="myo-eyebrow block mb-2">Categoria</span>
               <select
                 className="myo-field"
                 value={category}
                 onChange={(event) => setCategory(event.target.value)}
               >
-                <option value="">All categories</option>
+                <option value="">Todas as categorias</option>
                 {facets?.categories.map((item) => (
                   <option key={item} value={item}>
                     {label(item)}
@@ -94,28 +94,28 @@ export function ExerciseCatalog({
               </select>
             </label>
             <label className="block">
-              <span className="myo-eyebrow block mb-2">Equipment</span>
+              <span className="myo-eyebrow block mb-2">Equipamento</span>
               <select
                 className="myo-field"
                 value={equipment}
                 onChange={(event) => setEquipment(event.target.value)}
               >
-                <option value="">Any equipment</option>
+                <option value="">Qualquer equipamento</option>
                 {facets?.equipment.map((item) => (
                   <option key={item} value={item}>
-                    {label(item)}
+                    {equipmentLabel(item)}
                   </option>
                 ))}
               </select>
             </label>
             <label className="block">
-              <span className="myo-eyebrow block mb-2">Muscle</span>
+              <span className="myo-eyebrow block mb-2">Músculo</span>
               <select
                 className="myo-field"
                 value={muscle}
                 onChange={(event) => setMuscle(event.target.value as MuscleId | "")}
               >
-                <option value="">Any muscle</option>
+                <option value="">Qualquer músculo</option>
                 {muscles.map((item) => (
                   <option key={item} value={item}>
                     {muscleLabel(item)}
@@ -126,7 +126,7 @@ export function ExerciseCatalog({
           </div>
 
           <p className="myo-eyebrow mb-6">
-            {loading ? "Loading" : `${total} exercises`}
+            {loading ? "Carregando" : `${total} exercícios`}
           </p>
 
           <ul className="myo-card divide-y" style={{ borderColor: "var(--border)" }}>
@@ -140,24 +140,21 @@ export function ExerciseCatalog({
               >
                 <div className="min-w-0 flex-1">
                   <p style={{ fontSize: "var(--text-15)" }}>{exercise.display_name}</p>
-                  <p className="myo-mono" style={{ color: "var(--muted)" }}>
-                    {exercise.garmin_category} / {exercise.garmin_exercise_name}
-                  </p>
                   <p className="myo-mono mt-1" style={{ color: "var(--muted)" }}>
-                    {exercise.primary_muscles.map(muscleLabel).join(", ") || "No muscle data"}
-                    {exercise.is_compound ? " · compound" : ""}
+                    {exercise.primary_muscles.map(muscleLabel).join(", ") || "Sem dados musculares"}
+                    {exercise.is_compound ? " · composto" : ""}
                   </p>
                 </div>
                 {onAdd && (
                   <button type="button" className="myo-btn" onClick={() => onAdd(exercise)}>
-                    Add
+                    Adicionar
                   </button>
                 )}
               </li>
             ))}
             {page?.items.length === 0 && (
               <li className="px-4 py-6" style={{ color: "var(--muted)" }}>
-                No exercise matches these filters.
+                Nenhum exercício corresponde a estes filtros.
               </li>
             )}
           </ul>
@@ -169,7 +166,7 @@ export function ExerciseCatalog({
               disabled={offset === 0}
               onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
             >
-              Previous
+              Anterior
             </button>
             <span className="myo-mono" style={{ color: "var(--muted)" }}>
               {currentPage} / {pageCount}
@@ -180,14 +177,14 @@ export function ExerciseCatalog({
               disabled={offset + PAGE_SIZE >= total}
               onClick={() => setOffset(offset + PAGE_SIZE)}
             >
-              Next
+              Próxima
             </button>
           </div>
         </div>
 
         <aside>
           <p className="myo-eyebrow mb-6">
-            {preview ? preview.display_name : "Hover an exercise"}
+            {preview ? preview.display_name : "Passe o cursor sobre um exercício"}
           </p>
           <BodyMap
             primary={preview?.primary_muscles ?? []}
@@ -197,12 +194,12 @@ export function ExerciseCatalog({
           />
           {preview && (
             <dl className="mt-6" style={{ fontSize: "var(--text-13)" }}>
-              <dt className="myo-eyebrow">Primary</dt>
+              <dt className="myo-eyebrow">Primários</dt>
               <dd className="mb-3">
-                {preview.primary_muscles.map(muscleLabel).join(", ") || "None"}
+                {preview.primary_muscles.map(muscleLabel).join(", ") || "Nenhum"}
               </dd>
-              <dt className="myo-eyebrow">Secondary</dt>
-              <dd>{preview.secondary_muscles.map(muscleLabel).join(", ") || "None"}</dd>
+              <dt className="myo-eyebrow">Secundários</dt>
+              <dd>{preview.secondary_muscles.map(muscleLabel).join(", ") || "Nenhum"}</dd>
             </dl>
           )}
         </aside>

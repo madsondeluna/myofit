@@ -11,9 +11,9 @@ import type { ReactNode } from "react";
 export type PageId = "builder" | "catalog" | "equipment" | "settings";
 
 const NAV: { id: PageId; label: string }[] = [
-  { id: "builder", label: "Workouts" },
-  { id: "catalog", label: "Catalog" },
-  { id: "equipment", label: "Equipment" },
+  { id: "builder", label: "Treinos" },
+  { id: "catalog", label: "Exercícios" },
+  { id: "equipment", label: "Equipamento" },
   { id: "settings", label: "Garmin" },
 ];
 
@@ -70,15 +70,15 @@ export function AppShell({
           className="mx-auto w-full max-w-6xl px-6 py-3"
           style={{ fontSize: "var(--text-12)", color: "var(--muted)" }}
         >
-          MyoFit is an educational tool. Training programmes, loads and exercise
-          selection should be reviewed by a qualified professional before use.
+          O MyoFit tem finalidade didática. Treinos, cargas e seleção de
+          exercícios devem ter acompanhamento de profissional qualificado.
         </p>
       </footer>
     </div>
   );
 }
 
-/** Section title. Cormorant lives here and nowhere else. */
+/** Section title. The only place the display weight is used. */
 export function SectionTitle({ children }: { children: ReactNode }) {
   return (
     <h2 className="myo-display mb-6" style={{ fontSize: "var(--text-32)" }}>

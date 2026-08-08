@@ -10,7 +10,7 @@ import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -81,11 +81,24 @@ if FRONTEND_DIST.is_dir():
         name="assets",
     )
 
+    _DIST_ROOT = FRONTEND_DIST.resolve()
+
     @app.get("/{full_path:path}")
     def serve_spa(full_path: str) -> FileResponse:
-        # Any non-API path falls through to index.html so client-side routing
-        # survives a page reload.
-        candidate = FRONTEND_DIST / full_path
-        if full_path and candidate.is_file():
+        # An unmatched /api path must 404 rather than fall through to the SPA:
+        # returning index.html with a 200 would surface a typo'd endpoint as a
+        # JSON parse error in the client instead of a missing route.
+        if full_path == "api" or full_path.startswith("api/"):
+            raise HTTPException(status_code=404, detail="not found")
+
+        # Any other path falls through to index.html so client-side routing
+        # survives a page reload. The resolve plus containment check is what
+        # stops "../" segments from reaching outside the build directory.
+        candidate = (_DIST_ROOT / full_path).resolve()
+        if (
+            full_path
+            and candidate.is_file()
+            and candidate.is_relative_to(_DIST_ROOT)
+        ):
             return FileResponse(candidate)
-        return FileResponse(FRONTEND_DIST / "index.html")
+        return FileResponse(_DIST_ROOT / "index.html")

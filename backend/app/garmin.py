@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import logging
 import os
+import time
 from pathlib import Path
 
 from .models import Exercise, Workout, WorkoutExercise
@@ -80,6 +81,27 @@ def status(token_dir: Path | None = None) -> GarminStatus:
     return GarminStatus(authenticated=True, profile_name=name)
 
 
+# --- Pending two-factor logins ---------------------------------------------
+# Garmin issues its verification code against one specific login attempt, so the
+# second request has to resume *that* attempt. HTTP gives us no continuity
+# between the two calls, and constructing a fresh client would discard the state
+# the code was issued for. The attempt is therefore parked here, keyed by email,
+# between the two requests.
+#
+# In-process and single-node by design: MyoFit is a personal, single-user app.
+# A multi-worker deploy would need this in shared storage.
+_PENDING_MFA: dict[str, tuple[object, dict, float]] = {}
+
+# Garmin's codes are short lived; anything older than this is not worth keeping.
+PENDING_MFA_TTL_SECONDS = 300
+
+
+def _drop_expired_mfa(now: float) -> None:
+    for key, (_client, _state, created) in list(_PENDING_MFA.items()):
+        if now - created > PENDING_MFA_TTL_SECONDS:
+            del _PENDING_MFA[key]
+
+
 def login(email: str, password: str, mfa_code: str | None = None,
           token_dir: Path | None = None) -> GarminStatus:
     """Exchange credentials for garth tokens and persist only the tokens."""
@@ -91,30 +113,49 @@ def login(email: str, password: str, mfa_code: str | None = None,
     except ImportError as exc:
         return GarminStatus(authenticated=False, detail=f"garminconnect is not installed: {exc}")
 
+    now = time.monotonic()
+    _drop_expired_mfa(now)
+    key = email.strip().lower()
+
+    # Second leg: a code was supplied and a parked attempt is waiting for it.
+    if mfa_code and key in _PENDING_MFA:
+        client, state, _created = _PENDING_MFA.pop(key)
+        try:
+            client.resume_login(state, mfa_code.strip())
+            client.garth.dump(str(directory))
+        except Exception as exc:
+            return GarminStatus(authenticated=False, detail=f"verification failed: {exc}")
+        return GarminStatus(authenticated=True, profile_name=_full_name(client))
+
     try:
-        # return_on_mfa lets the caller supply the code instead of the library
-        # blocking on an interactive prompt, which would hang the API worker.
-        client = Garmin(email=email, password=password, return_on_mfa=mfa_code is None)
+        # return_on_mfa is always set: it makes the library hand back the
+        # pending state instead of blocking on an interactive prompt, which
+        # would hang the worker serving the request.
+        client = Garmin(email=email, password=password, return_on_mfa=True)
         result = client.login()
 
-        # When MFA is pending the library returns a ("needs_mfa", state) tuple.
+        # A pending second factor comes back as ("needs_mfa", client_state).
         if isinstance(result, tuple) and result and result[0] == "needs_mfa":
-            if not mfa_code:
-                return GarminStatus(
-                    authenticated=False,
-                    detail="mfa_required: resubmit with the code Garmin sent you",
-                )
-            client.resume_login(result[1], mfa_code)
+            _PENDING_MFA[key] = (client, result[1], now)
+            return GarminStatus(
+                authenticated=False,
+                detail="mfa_required: resubmit with the code Garmin sent you",
+            )
 
         client.garth.dump(str(directory))
     except Exception as exc:
         return GarminStatus(authenticated=False, detail=f"login failed: {exc}")
 
+    return GarminStatus(authenticated=True, profile_name=_full_name(client))
+
+
+def _full_name(client) -> str | None:
     try:
-        name = client.get_full_name()
+        return client.get_full_name()
     except Exception:
-        name = None
-    return GarminStatus(authenticated=True, profile_name=name)
+        # The session is valid even when the profile call fails; the name is
+        # cosmetic and must not turn a successful login into a failure.
+        return None
 
 
 def logout(token_dir: Path | None = None) -> GarminStatus:
@@ -124,6 +165,7 @@ def logout(token_dir: Path | None = None) -> GarminStatus:
         for item in directory.iterdir():
             if item.is_file():
                 item.unlink()
+    _PENDING_MFA.clear()
     return GarminStatus(authenticated=False, detail="stored session removed")
 
 
