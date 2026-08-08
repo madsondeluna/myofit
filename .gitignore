@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+
+# Database
+*.db
+*.db-journal
+*.sqlite3
+
+# Garmin auth: garth session tokens. Never commit these.
+.garth/
+garth_tokens/
+*.garth
+secrets.json
+
+# FIT artifacts
+*.fit
+!backend/tests/fixtures/*.fit
+
+# Node
+node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Env
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store

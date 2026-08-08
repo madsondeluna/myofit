@@ -1,0 +1,220 @@
+"""Garmin Connect integration.
+
+This talks to Garmin's internal workout-service through the `garminconnect`
+library, which is an unofficial client: Garmin publishes no contract for these
+endpoints and can change them without notice. Every call here is wrapped so a
+change upstream surfaces as a readable message instead of a traceback.
+
+Credentials are never persisted. The login exchanges them for garth OAuth
+tokens, and only those tokens are written to disk, in the directory named by
+GARMINTOKENS (default ./.garth, which is gitignored).
+"""
+
+from __future__ import annotations
+
+import logging
+import os
+from pathlib import Path
+
+from .models import Exercise, Workout, WorkoutExercise
+from .schemas import GarminStatus, SyncResult
+
+logger = logging.getLogger(__name__)
+
+DEFAULT_TOKEN_DIR = Path(os.getenv("GARMINTOKENS", ".garth")).expanduser()
+
+# Garmin's sport id for strength training, as used by the workout-service JSON.
+STRENGTH_SPORT_TYPE = {"sportTypeId": 5, "sportTypeKey": "strength_training"}
+
+# One block per exercise occupies three step orders: the repeat group, the
+# exercise step and the rest step.
+STEP_ORDERS_PER_BLOCK = 3
+
+
+class GarminUnavailable(RuntimeError):
+    """Raised when the unofficial API cannot be reached or has changed shape."""
+
+
+def _client(token_dir: Path | None = None):
+    """Return a Garmin client restored from stored tokens, or None if absent.
+
+    Imported lazily so that neither the test suite nor a Render boot without
+    credentials pays the import cost or fails when the library is missing.
+    """
+    directory = token_dir or DEFAULT_TOKEN_DIR
+    if not directory.exists():
+        return None
+
+    try:
+        from garminconnect import Garmin
+    except ImportError as exc:  # pragma: no cover - dependency is declared
+        raise GarminUnavailable(f"garminconnect is not installed: {exc}") from exc
+
+    try:
+        client = Garmin()
+        client.login(tokenstore=str(directory))
+        return client
+    except Exception as exc:
+        # Expired or malformed tokens land here. Treat as "not authenticated"
+        # rather than an error, so the UI offers a fresh login.
+        logger.info("Stored Garmin session could not be resumed: %s", exc)
+        return None
+
+
+def status(token_dir: Path | None = None) -> GarminStatus:
+    try:
+        client = _client(token_dir)
+    except GarminUnavailable as exc:
+        return GarminStatus(authenticated=False, detail=str(exc))
+
+    if client is None:
+        return GarminStatus(
+            authenticated=False, detail="no stored session; sign in on the settings page"
+        )
+
+    try:
+        name = client.get_full_name()
+    except Exception as exc:
+        return GarminStatus(authenticated=False, detail=f"session rejected by Garmin: {exc}")
+
+    return GarminStatus(authenticated=True, profile_name=name)
+
+
+def login(email: str, password: str, mfa_code: str | None = None,
+          token_dir: Path | None = None) -> GarminStatus:
+    """Exchange credentials for garth tokens and persist only the tokens."""
+    directory = token_dir or DEFAULT_TOKEN_DIR
+    directory.mkdir(parents=True, exist_ok=True)
+
+    try:
+        from garminconnect import Garmin
+    except ImportError as exc:
+        return GarminStatus(authenticated=False, detail=f"garminconnect is not installed: {exc}")
+
+    try:
+        # return_on_mfa lets the caller supply the code instead of the library
+        # blocking on an interactive prompt, which would hang the API worker.
+        client = Garmin(email=email, password=password, return_on_mfa=mfa_code is None)
+        result = client.login()
+
+        # When MFA is pending the library returns a ("needs_mfa", state) tuple.
+        if isinstance(result, tuple) and result and result[0] == "needs_mfa":
+            if not mfa_code:
+                return GarminStatus(
+                    authenticated=False,
+                    detail="mfa_required: resubmit with the code Garmin sent you",
+                )
+            client.resume_login(result[1], mfa_code)
+
+        client.garth.dump(str(directory))
+    except Exception as exc:
+        return GarminStatus(authenticated=False, detail=f"login failed: {exc}")
+
+    try:
+        name = client.get_full_name()
+    except Exception:
+        name = None
+    return GarminStatus(authenticated=True, profile_name=name)
+
+
+def logout(token_dir: Path | None = None) -> GarminStatus:
+    """Delete the stored tokens. The Garmin session itself is left alone."""
+    directory = token_dir or DEFAULT_TOKEN_DIR
+    if directory.exists():
+        for item in directory.iterdir():
+            if item.is_file():
+                item.unlink()
+    return GarminStatus(authenticated=False, detail="stored session removed")
+
+
+def build_payload(workout: Workout, entries: list[tuple[WorkoutExercise, Exercise]]) -> dict:
+    """Build the workout-service JSON for a strength workout.
+
+    The category and exerciseName values are the FIT SDK enum member names
+    carried through from seeding, which is what makes the workout resolve to
+    the right movement on the watch.
+    """
+    try:
+        from garminconnect.workout import (
+            StrengthWorkout,
+            WorkoutSegment,
+            create_strength_set,
+        )
+    except ImportError as exc:
+        raise GarminUnavailable(
+            f"garminconnect.workout is unavailable: {exc}"
+        ) from exc
+
+    steps = []
+    step_order = 1
+    for workout_exercise, exercise in entries:
+        steps.append(
+            create_strength_set(
+                exercise.garmin_category,
+                step_order=step_order,
+                sets=max(1, workout_exercise.sets),
+                reps=workout_exercise.reps,
+                rest_seconds=workout_exercise.rest_seconds,
+                exercise_name=exercise.garmin_exercise_name,
+                weight_kg=workout_exercise.load_kg,
+            )
+        )
+        step_order += STEP_ORDERS_PER_BLOCK
+
+    payload = StrengthWorkout(
+        workoutName=workout.name[:80],
+        estimatedDurationInSecs=0,
+        workoutSegments=[
+            WorkoutSegment(
+                segmentOrder=1,
+                sportType=dict(STRENGTH_SPORT_TYPE),
+                workoutSteps=steps,
+            )
+        ],
+    )
+    return payload.to_dict()
+
+
+def push_workout(
+    workout: Workout,
+    entries: list[tuple[WorkoutExercise, Exercise]],
+    token_dir: Path | None = None,
+) -> SyncResult:
+    try:
+        client = _client(token_dir)
+    except GarminUnavailable as exc:
+        return SyncResult(ok=False, detail=str(exc))
+
+    if client is None:
+        return SyncResult(
+            ok=False, detail="not signed in to Garmin; sign in on the settings page"
+        )
+
+    try:
+        payload = build_payload(workout, entries)
+    except GarminUnavailable as exc:
+        return SyncResult(ok=False, detail=str(exc))
+
+    try:
+        response = client.upload_workout(payload)
+    except Exception as exc:
+        # Covers auth expiry, rate limiting and any endpoint change. The user
+        # still has the .FIT export as a fallback.
+        return SyncResult(
+            ok=False,
+            detail=(
+                f"Garmin rejected the upload: {exc}. This API is unofficial and "
+                "may have changed; the .FIT export is unaffected."
+            ),
+        )
+
+    workout_id = None
+    if isinstance(response, dict):
+        workout_id = response.get("workoutId") or response.get("workoutid")
+    if workout_id is None:
+        return SyncResult(
+            ok=False,
+            detail=f"upload returned an unexpected response shape: {response!r}",
+        )
+
+    return SyncResult(ok=True, garmin_workout_id=str(workout_id))
