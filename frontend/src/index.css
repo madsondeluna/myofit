@@ -43,9 +43,14 @@
   --heat-6: var(--div-8);
   --heat-7: var(--div-9);
 
-  /* Muscle groups the current selection does not touch. */
-  --muscle-idle: var(--slate-250);
-  --muscle-outline: var(--border);
+  /* The silhouette and an unworked muscle must not share a tone: with both on
+     the same value the muscle shapes vanished into the body and the map read
+     as a blank figure. The body sits one step lighter than an idle muscle, and
+     the outline one step darker than both, so the anatomy is legible before
+     anything is selected. */
+  --muscle-body: var(--slate-150);
+  --muscle-idle: var(--slate-300);
+  --muscle-outline: var(--slate-400);
 }
 
 html,
@@ -183,6 +188,17 @@ body::before {
   cursor: not-allowed;
 }
 
+/* A disabled primary drops the accent fill instead of veiling it: the accent
+   under 45% opacity reads as a muddy block, not as an unavailable control. */
+.pill-primary:disabled,
+.pill-primary[aria-disabled="true"] {
+  background-color: transparent;
+  background-image: var(--glass-fill);
+  border-color: var(--glass-edge);
+  color: var(--muted);
+  opacity: 1;
+}
+
 /* A disabled control must not lift under the pointer. */
 .pill:disabled:hover,
 .pill[aria-disabled="true"]:hover {
@@ -303,7 +319,9 @@ body::before {
 
 .myo-rail {
   display: flex;
-  gap: var(--space-8);
+  /* 12px, not 8: the glass edge is white and at 8px two neighbouring pills
+     read as one continuous bar. */
+  gap: var(--space-12);
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
@@ -325,13 +343,13 @@ body::before {
 }
 
 .myo-base {
-  fill: var(--muscle-idle);
+  fill: var(--muscle-body);
 }
 
 .myo-muscle {
   fill: var(--muscle-idle);
   stroke: var(--muscle-outline);
-  stroke-width: 0.6;
+  stroke-width: 0.8;
 }
 
 .myo-muscle.is-interactive {
