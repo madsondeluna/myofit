@@ -11,8 +11,20 @@ from pathlib import Path
 from sqlalchemy import event
 from sqlmodel import Session, SQLModel, create_engine
 
-DEFAULT_DB_PATH = Path(__file__).resolve().parents[2] / "myofit.db"
-DATABASE_URL = os.getenv("MYOFIT_DB", f"sqlite:///{DEFAULT_DB_PATH}")
+# The database is runtime state, not source, so it defaults outside the
+# checkout. This also avoids a real failure mode: SQLite needs byte-range locks
+# that some mounted filesystems do not provide, and exFAT in particular rejects
+# every write with "attempt to write a readonly database". A repository sitting
+# on such a volume would be unable to run the app at all.
+DEFAULT_DB_DIR = Path(
+    os.getenv("XDG_DATA_HOME", Path.home() / ".local" / "share")
+) / "myofit"
+DATABASE_URL = os.getenv("MYOFIT_DB", f"sqlite:///{DEFAULT_DB_DIR / 'myofit.db'}")
+
+# Only create the directory when the default is in use; an explicit MYOFIT_DB
+# may point at a path the deploy already provisioned, or at an in-memory URL.
+if "MYOFIT_DB" not in os.environ:
+    DEFAULT_DB_DIR.mkdir(parents=True, exist_ok=True)
 
 # check_same_thread=False is required because FastAPI serves requests from a
 # thread pool while SQLite defaults to single-thread ownership.

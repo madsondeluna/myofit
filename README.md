@@ -181,10 +181,16 @@ this repository, because doing so requires real credentials.
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `MYOFIT_DB` | `sqlite:///./myofit.db` | Database URL |
+| `MYOFIT_DB` | `sqlite:///~/.local/share/myofit/myofit.db` | Database URL |
 | `GARMINTOKENS` | `.garth` | Directory holding garth session tokens |
 | `MYOFIT_CORS_ORIGINS` | `http://localhost:5173,http://127.0.0.1:5173` | Comma-separated allowed origins |
 | `PORT` | `8000` | Port the container listens on |
+
+The database defaults outside the checkout because it is runtime state, and
+because SQLite requires byte-range locks that some mounted filesystems do not
+provide. On exFAT in particular every write fails with "attempt to write a
+readonly database", so a checkout on such a volume could not run the app if the
+database lived beside the source.
 
 ## Deployment
 
