@@ -255,7 +255,11 @@ body::before {
    text stayed legible straight through the footer. --surface-glass is the
    token for exactly this, a 96% surface that still lets the blur and the
    gradient read as material rather than as a solid block. */
-.myo-bar {
+/* .glass.myo-bar, not .myo-bar: the language sets background-color to
+   transparent on `.glass:not(.card-glass)`, which is two classes and beats a
+   single one. Written with one class this rule was simply discarded, and both
+   bars stayed see-through with the page reading straight through them. */
+.glass.myo-bar {
   border-radius: var(--radius-0);
   background-color: var(--surface-glass);
 }
