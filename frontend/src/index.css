@@ -1,0 +1,188 @@
+@import "tailwindcss";
+@import "./prussian/tokens.css";
+@import "./prussian/patterns.css";
+
+/*
+  MyoFit application layer over the Prussian design language.
+
+  The two files above are a vendored copy of
+  /Volumes/promethion/prussian-design-language/web/{tokens,patterns}.css,
+  taken 2026-08-08. They are not edited here: everything MyoFit adds lives in
+  this file, so a future session can diff the copies against the source repo
+  and know that any difference is drift to be corrected, not a local change.
+
+  MyoFit ships in the graphite dark mode (:root.dark), which is Prussian's
+  neutral dark. The blue dark is :root.deep-blue and is a different mode.
+*/
+
+:root {
+  /*
+    Heat ramp for the body map.
+
+    Prussian's ordinal ramp runs light to dark in the light mode and is
+    re-anchored, not flipped, in the dark modes: there --seq-1 is the lightest
+    step. "Hottest" therefore means the darkest step on a light background and
+    the lightest step on a dark one. These aliases give the body map a single
+    direction to code against, with --heat-7 always the most worked muscle,
+    while leaving the validated ramps untouched.
+  */
+  --heat-1: var(--seq-1);
+  --heat-2: var(--seq-2);
+  --heat-3: var(--seq-3);
+  --heat-4: var(--seq-4);
+  --heat-5: var(--seq-5);
+  --heat-6: var(--seq-6);
+  --heat-7: var(--seq-7);
+
+  /* Muscle groups the current selection does not touch. */
+  --muscle-idle: var(--slate-250);
+  --muscle-outline: var(--border);
+}
+
+:root.dark,
+:root.deep-blue {
+  --heat-1: var(--seq-7);
+  --heat-2: var(--seq-6);
+  --heat-3: var(--seq-5);
+  --heat-4: var(--seq-4);
+  --heat-5: var(--seq-3);
+  --heat-6: var(--seq-2);
+  --heat-7: var(--seq-1);
+}
+
+:root.dark {
+  --muscle-idle: var(--graphite-850);
+}
+
+:root.deep-blue {
+  --muscle-idle: var(--slate-800);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans, "Geist", system-ui, sans-serif);
+  font-size: var(--text-15);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- Type roles ---------------------------------------------------------
+   Three families, three jobs. Section titles are the only place Cormorant
+   appears, and it never goes below --text-32. */
+
+.myo-display {
+  font-family: var(--font-display, "Cormorant Garamond", Georgia, serif);
+  font-weight: 300;
+  letter-spacing: var(--tracking-display, -0.02em);
+  line-height: var(--leading-none, 1);
+}
+
+.myo-mono {
+  font-family: var(--font-mono, "Geist Mono", ui-monospace, monospace);
+  font-size: var(--text-12);
+}
+
+.myo-eyebrow {
+  font-family: var(--font-mono, "Geist Mono", ui-monospace, monospace);
+  font-size: var(--text-12);
+  letter-spacing: var(--tracking-eyebrow, 0.12em);
+  color: var(--muted);
+}
+
+/* --- Form controls ------------------------------------------------------
+   One size per control class: controls are --text-12. Surfaces take radius
+   zero, so inputs and cards are square and separated by a 1px hairline. */
+
+.myo-field {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  color: var(--text);
+  font-size: var(--text-12);
+  padding: 8px 10px;
+  width: 100%;
+  transition: border-color var(--duration-3, 200ms) var(--ease-standard, ease);
+}
+
+.myo-field:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+  border-color: var(--accent);
+}
+
+/* Controls take full radius. */
+.myo-btn {
+  border-radius: var(--radius-full, 999px);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: var(--text-12);
+  padding: 8px 16px;
+  cursor: pointer;
+  transition:
+    background var(--duration-5, 350ms) var(--ease-out-soft, ease),
+    border-color var(--duration-5, 350ms) var(--ease-out-soft, ease);
+}
+
+.myo-btn:hover:not(:disabled) {
+  background: var(--surface-hover);
+  border-color: var(--border-hover);
+}
+
+.myo-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.myo-btn-accent {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}
+
+.myo-btn-accent:hover:not(:disabled) {
+  background: var(--accent);
+  border-color: var(--text);
+}
+
+/* Surfaces: radius zero, hairline separation. */
+.myo-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0;
+}
+
+/* --- Body map ------------------------------------------------------------ */
+
+.myo-figure path,
+.myo-figure g {
+  transition: fill var(--duration-5, 350ms) var(--ease-out-soft, ease);
+}
+
+.myo-base {
+  fill: var(--muscle-idle);
+}
+
+.myo-muscle {
+  fill: var(--muscle-idle);
+  stroke: var(--muscle-outline);
+  stroke-width: 0.6;
+}
+
+.myo-muscle.is-interactive {
+  cursor: pointer;
+}
+
+/* Reduced motion is honoured across the whole app. */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+  }
+}

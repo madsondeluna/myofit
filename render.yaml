@@ -1,0 +1,24 @@
+# Render blueprint. Apply with "New > Blueprint" pointed at this repository.
+services:
+  - type: web
+    name: myofit
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    healthCheckPath: /api/health
+    envVars:
+      # SQLite and the garth token directory both live on the mounted disk, so
+      # workouts and the Garmin session survive a redeploy. Without a disk the
+      # database is recreated empty on every boot and the catalog reseeds.
+      - key: MYOFIT_DB
+        value: sqlite:////data/myofit.db
+      - key: GARMINTOKENS
+        value: /data/garth
+      # The frontend is served from this same service, so no cross-origin
+      # request is expected in production.
+      - key: MYOFIT_CORS_ORIGINS
+        value: ""
+    disk:
+      name: myofit-data
+      mountPath: /data
+      sizeGB: 1

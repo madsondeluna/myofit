@@ -36,30 +36,38 @@ class MuscleGroup(StrEnum):
     OBLIQUES = "obliques"
 
 
-# Which anatomical view shows each group. Used by the frontend to decide whether
-# a highlighted muscle is visible on the currently displayed side, and by the
-# test that checks SVG path coverage.
-MUSCLE_VIEW: dict[MuscleGroup, str] = {
-    MuscleGroup.QUADRICEPS: "front",
-    MuscleGroup.HAMSTRINGS: "back",
-    MuscleGroup.GLUTES: "back",
-    MuscleGroup.ADDUCTORS: "front",
-    MuscleGroup.ABDUCTORS: "front",
-    MuscleGroup.CALVES: "back",
-    MuscleGroup.ERECTOR_SPINAE: "back",
-    MuscleGroup.LATS: "back",
-    MuscleGroup.TRAPS: "back",
-    MuscleGroup.RHOMBOIDS: "back",
-    MuscleGroup.REAR_DELTS: "back",
-    MuscleGroup.FRONT_DELTS: "front",
-    MuscleGroup.SIDE_DELTS: "front",
-    MuscleGroup.CHEST: "front",
-    MuscleGroup.BICEPS: "front",
-    MuscleGroup.TRICEPS: "back",
-    MuscleGroup.FOREARMS: "front",
-    MuscleGroup.ABS: "front",
-    MuscleGroup.OBLIQUES: "front",
+# Which anatomical views show each group. A muscle can appear in both: the
+# trapezius wraps the neck and is visible from the front, the calf shows its
+# gastrocnemius from behind and the shin from the front, and the deltoid and
+# forearm are simply on both sides of the body.
+#
+# The frontend uses this to know whether a highlighted muscle is visible on the
+# currently displayed side, and the test suite uses it to assert that every
+# muscle listed here has a matching SVG path id in every view named. A muscle
+# with no path is the failure that produces a map which never highlights.
+MUSCLE_VIEWS: dict[MuscleGroup, tuple[str, ...]] = {
+    MuscleGroup.QUADRICEPS: ("front",),
+    MuscleGroup.HAMSTRINGS: ("back",),
+    MuscleGroup.GLUTES: ("back",),
+    MuscleGroup.ADDUCTORS: ("front",),
+    MuscleGroup.ABDUCTORS: ("front",),
+    MuscleGroup.CALVES: ("front", "back"),
+    MuscleGroup.ERECTOR_SPINAE: ("back",),
+    MuscleGroup.LATS: ("back",),
+    MuscleGroup.TRAPS: ("front", "back"),
+    MuscleGroup.RHOMBOIDS: ("back",),
+    MuscleGroup.REAR_DELTS: ("back",),
+    MuscleGroup.FRONT_DELTS: ("front",),
+    MuscleGroup.SIDE_DELTS: ("front", "back"),
+    MuscleGroup.CHEST: ("front",),
+    MuscleGroup.BICEPS: ("front",),
+    MuscleGroup.TRICEPS: ("back",),
+    MuscleGroup.FOREARMS: ("front", "back"),
+    MuscleGroup.ABS: ("front",),
+    MuscleGroup.OBLIQUES: ("front",),
 }
+
+VIEWS: tuple[str, ...] = ("front", "back")
 
 
 class EquipmentType(StrEnum):

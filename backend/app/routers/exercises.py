@@ -10,7 +10,7 @@ from sqlmodel import Session, select
 
 from ..db import get_session
 from ..models import Exercise
-from ..muscles import MUSCLE_VIEW, EquipmentType, MuscleGroup
+from ..muscles import MUSCLE_VIEWS, EquipmentType, MuscleGroup
 from ..schemas import ExercisePage, ExerciseRead
 
 router = APIRouter(prefix="/api/exercises", tags=["exercises"])
@@ -89,7 +89,8 @@ def facets(session: Session = Depends(get_session)) -> dict[str, object]:
         "equipment": list(equipment),
         "equipment_types": [item.value for item in EquipmentType],
         "muscles": [
-            {"id": muscle.value, "view": MUSCLE_VIEW[muscle]} for muscle in MuscleGroup
+            {"id": muscle.value, "views": list(MUSCLE_VIEWS[muscle])}
+            for muscle in MuscleGroup
         ],
     }
 

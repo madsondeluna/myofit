@@ -1,0 +1,653 @@
+/* prussian / patterns.css
+   Os componentes da linguagem, reescritos em cima dos tokens.
+   Nenhum valor literal aqui: todo numero vem de tokens.css.
+   Importar depois de tokens.css. */
+
+/* base */
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--bg);
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--text-16);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+* { box-sizing: border-box; }
+
+a { color: inherit; text-decoration: none; }
+
+/* dd nasce com margin-inline-start de 40px no navegador, o que desalinha
+   qualquer lista de definicao usada como tabela de metadados */
+dl, dd { margin: 0; }
+
+::selection { background: var(--text); color: var(--bg); }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* tipografia */
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-11);
+  letter-spacing: var(--tracking-eyebrow);
+  color: var(--muted);
+  text-transform: none;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-weight: var(--weight-light);
+  line-height: var(--leading-none);
+  letter-spacing: var(--tracking-display);
+  color: var(--text);
+}
+
+.display-section { font-size: var(--text-display-section); }
+.display-name    { font-size: var(--text-display-name); }
+
+.prose {
+  max-width: var(--measure-prose);
+  font-size: var(--text-15);
+  line-height: var(--leading-normal);
+  color: var(--muted);
+}
+
+/* justificado e opcional, nao base: em coluna estreita abre rios de espaco */
+.prose-justify { text-align: justify; }
+
+.mono { font-family: var(--font-mono); }
+
+/* cabecalho de secao: numero, titulo display, linha */
+
+.section-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  padding-bottom: var(--space-48);
+  border-bottom: var(--hairline) solid var(--border);
+  margin-bottom: var(--space-56);
+}
+
+/* superficies */
+
+.surface {
+  background: var(--surface);
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-0);
+}
+
+/* o !important existe porque os cartoes do site definem background por
+   style inline, que vence qualquer seletor. Ao migrar um componente para
+   estas classes, tire o background inline e o !important pode sair junto. */
+.hover-surface {
+  transition: background var(--duration-3) var(--ease-standard);
+  cursor: pointer;
+}
+.hover-surface:hover { background: var(--surface-hover) !important; }
+
+/* cartao de vidro: superficie translucida sobre conteudo, raio zero */
+.card-glass {
+  background-image: var(--glass-fill);
+  background-color: var(--surface-glass);
+  border: var(--hairline) solid var(--glass-edge);
+  backdrop-filter: blur(var(--blur-card)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--blur-card)) saturate(var(--glass-saturate));
+  box-shadow: var(--shadow-glass-rest);
+  isolation: isolate;
+  cursor: pointer;
+  transition:
+    background-image var(--duration-5) var(--ease-out-soft),
+    border-color var(--duration-5) var(--ease-out-soft),
+    box-shadow var(--duration-5) var(--ease-out-soft);
+}
+.card-glass:hover {
+  background-image: var(--glass-fill-hover);
+  border-color: var(--glass-edge-hover);
+  box-shadow: var(--shadow-glass-hover);
+}
+
+/* grade de cartoes: as celulas nao tem borda propria, o vao de 1px
+   sobre o fundo --border desenha a grade inteira */
+.hairline-grid {
+  display: grid;
+  gap: var(--hairline);
+  background: var(--border);
+}
+
+/* ---------- vidro ----------
+
+   .glass e o material, nao um componente. Aplique em pilula, cartao,
+   barra, popover ou tooltip: o material e sempre o mesmo, so a forma muda.
+
+   O material tem cinco camadas e todas importam:
+   preenchimento em gradiente vertical, desfoque do fundo, saturacao,
+   realce especular na aresta de cima e refracao na de baixo.
+
+   O raio do desfoque nao e uma preferencia: ele precisa caber na caixa.
+   16px para pilula e tooltip, 32px para cartao e barra, 72px so sobre
+   canvas de tela cheia. Um raio grande num elemento baixo faz o Chrome
+   amostrar alem da caixa e desenhar um bloco fantasma no primeiro de
+   uma fileira de vizinhos de vidro. */
+
+.glass:not(.card-glass) {
+  background-image: var(--glass-fill);
+  background-color: transparent;
+  border: var(--hairline) solid var(--glass-edge);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  box-shadow: var(--shadow-glass-rest);
+  /* isola o backdrop desta superficie do das vizinhas */
+  isolation: isolate;
+  /* vidro fica sobre conteudo, nao sobre superficie plana, entao o fundo
+     atras dele e imprevisivel. O texto usa a tinta forte por regra, nunca
+     a mudada: e a unica cor que garante leitura sobre qualquer fundo.
+     .card-glass fica de fora porque ele assenta numa superficie conhecida
+     e segue a hierarquia normal de prosa. */
+  color: var(--text);
+  transition:
+    background-image var(--duration-5) var(--ease-out-soft),
+    border-color var(--duration-5) var(--ease-out-soft),
+    box-shadow var(--duration-5) var(--ease-out-soft),
+    color var(--duration-4) var(--ease-out-soft);
+}
+
+.glass:not(.card-glass):hover {
+  background-image: var(--glass-fill-hover);
+  border-color: var(--glass-edge-hover);
+  box-shadow: var(--shadow-glass-hover);
+}
+
+/* Quatro texturas. A diferenca entre elas e quanto do fundo sobrevive.
+   Combine com qualquer forma: raio zero, raio 8, pilula ou circulo. */
+
+/* fino: o fundo passa quase inteiro, so a aresta denuncia o material */
+.glass-thin {
+  background-image: var(--glass-fill-thin);
+  backdrop-filter: blur(var(--glass-blur-thin)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--glass-blur-thin)) saturate(140%);
+}
+
+/* fosco: e o unico que leva granulado. Sem o feTurbulence por cima o
+   resultado e translucido, nao fosco. */
+.glass-frost {
+  position: relative;
+  background-image: var(--glass-fill-frost);
+  backdrop-filter: blur(var(--glass-blur-frost)) saturate(130%) brightness(1.02);
+  -webkit-backdrop-filter: blur(var(--glass-blur-frost)) saturate(130%) brightness(1.02);
+}
+.glass-frost::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: var(--glass-grain);
+  opacity: var(--glass-grain-opacity);
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* fundo: quase nada do que esta atras sobrevive, so a cor media */
+.glass-deep {
+  background-image: var(--glass-fill-deep);
+  backdrop-filter: blur(var(--glass-blur-deep)) saturate(200%);
+  -webkit-backdrop-filter: blur(var(--glass-blur-deep)) saturate(200%);
+}
+
+/* tingido: o material assume a cor de acento sem virar preenchimento solido */
+.glass-accent {
+  background-image: var(--glass-tint-accent);
+  border-color: var(--glass-edge-accent);
+  color: var(--text);
+}
+.glass-accent:hover {
+  border-color: var(--glass-edge-accent);
+  filter: brightness(1.06);
+}
+
+/* formas: o material e o mesmo, so o raio muda */
+.glass-sq { border-radius: var(--radius-0); }
+.glass-soft { border-radius: var(--radius-8); }
+.glass-round { border-radius: var(--radius-full); }
+.glass-circle { border-radius: var(--radius-circle); aspect-ratio: 1; }
+
+/* painel flutuante: vidro com grade interna, para barra de ferramentas,
+   paleta de comandos ou controle sobreposto a um mapa ou grafico */
+.glass-panel {
+  display: grid;
+  gap: var(--hairline);
+  overflow: hidden;
+}
+.glass-panel > * {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: var(--space-12) var(--space-16);
+  font-family: var(--font-mono);
+  font-size: var(--text-12);
+  line-height: var(--leading-snug);
+  color: var(--text);
+  box-shadow: 0 0 0 var(--hairline) var(--glass-edge);
+  transition: background-color var(--duration-3) var(--ease-out-soft);
+}
+.glass-panel > *:hover {
+  background-color: var(--glass-tint-hover);
+}
+
+/* Reacao ao ponteiro. O vidro nao muda de cor no hover: ele sobe.
+   A aresta de cima acende, a sombra abre e a superficie levanta 2px.
+   Sem isso o material parece uma imagem, nao um objeto. */
+.glass-lift {
+  transition:
+    background-image var(--duration-5) var(--ease-out-soft),
+    border-color var(--duration-5) var(--ease-out-soft),
+    box-shadow var(--duration-5) var(--ease-out-soft),
+    transform var(--duration-5) var(--ease-out-soft),
+    color var(--duration-4) var(--ease-out-soft);
+}
+.glass-lift:hover {
+  transform: translateY(calc(-1 * var(--nudge-1)));
+  border-color: var(--glass-edge-hover);
+  box-shadow: var(--shadow-glass-hover);
+}
+.glass-lift:active {
+  transform: translateY(0);
+  transition-duration: var(--duration-1);
+}
+
+/* palco: vidro sobre fundo liso nao mostra nada. Este container da ao
+   material algo para refratar. Use so em documentacao e demonstracao. */
+.glass-stage {
+  position: relative;
+  overflow: hidden;
+  background: var(--dim);
+  border: var(--hairline) solid var(--border);
+}
+.glass-stage > .stage-art { position: absolute; inset: 0; }
+.glass-stage > .stage-content {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-16);
+  align-items: center;
+  padding: var(--space-32);
+}
+
+/* leitor do palco: diz qual textura esta sob o cursor e com que valores.
+   As texturas so se distinguem lado a lado; nomeadas, elas se aprendem. */
+.stage-readout {
+  position: absolute;
+  right: var(--space-16);
+  bottom: var(--space-16);
+  z-index: 3;
+  min-width: 232px;
+  padding: var(--space-12) var(--space-16);
+  border-radius: var(--radius-8);
+  background-image: var(--glass-fill-frost);
+  backdrop-filter: blur(var(--glass-blur-frost)) saturate(130%);
+  -webkit-backdrop-filter: blur(var(--glass-blur-frost)) saturate(130%);
+  border: var(--hairline) solid var(--glass-edge);
+  box-shadow: var(--shadow-glass-rest);
+  isolation: isolate;
+  font-family: var(--font-mono);
+  font-size: var(--text-11);
+  color: var(--muted);
+  pointer-events: none;
+  transition: opacity var(--duration-3) var(--ease-out-soft);
+}
+.stage-readout .name {
+  display: block;
+  color: var(--text);
+  font-size: var(--text-12);
+  letter-spacing: var(--tracking-wide);
+  padding-bottom: var(--space-6);
+  margin-bottom: var(--space-6);
+  border-bottom: var(--hairline) solid var(--glass-edge);
+}
+.stage-readout .row { display: flex; gap: var(--space-12); }
+.stage-readout .row span:last-child { margin-left: auto; color: var(--text); }
+
+/* ---------- pilulas ----------
+
+   .pill e de vidro por padrao: e a forma que a identidade usa.
+   .pill-solid existe para onde o vidro nao pode ir, como dentro de uma
+   tabela densa ou sobre uma superficie ja translucida. */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  padding: var(--space-8) var(--space-16);
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: var(--text-13);
+  line-height: var(--leading-snug);
+  color: var(--text);
+  user-select: none;
+  cursor: pointer;
+
+  background-image: var(--glass-fill);
+  background-color: transparent;
+  border: var(--hairline) solid var(--glass-edge);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  box-shadow: var(--shadow-glass-rest);
+  isolation: isolate;
+
+  /* a transicao e longa e amortecida: o vidro assenta, nao salta */
+  transition:
+    background-image var(--duration-5) var(--ease-out-soft),
+    border-color var(--duration-5) var(--ease-out-soft),
+    box-shadow var(--duration-5) var(--ease-out-soft),
+    color var(--duration-4) var(--ease-out-soft);
+}
+
+.pill:hover {
+  color: var(--text);
+  background-image: var(--glass-fill-hover);
+  border-color: var(--glass-edge-hover);
+  box-shadow: var(--shadow-glass-hover);
+}
+
+.pill:active {
+  box-shadow: var(--shadow-glass-rest);
+  transition-duration: var(--duration-1);
+}
+
+.pill-solid {
+  color: var(--muted);
+  background-image: none;
+  background-color: var(--surface);
+  border-color: var(--border);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+.pill-solid:hover {
+  background-image: none;
+  background-color: var(--surface-hover);
+  border-color: var(--border-hover);
+  box-shadow: none;
+}
+
+/* variante pequena, usada como acao dentro de um cartao */
+.pill-sm {
+  padding: var(--space-4) var(--space-10);
+  font-size: var(--text-11);
+  gap: var(--space-4);
+}
+
+/* o cartao inteiro e o alvo do hover, a pilula so reage */
+.hover-surface:hover .pill-sm {
+  color: var(--text);
+  border-color: var(--border-hover);
+}
+
+/* links */
+
+.link-muted {
+  color: var(--muted);
+  transition: color var(--duration-3) var(--ease-standard);
+}
+.link-muted:hover { color: var(--text); }
+
+.link-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  font-size: var(--text-14);
+  color: var(--text);
+  border-bottom: var(--hairline) solid var(--border);
+  padding-bottom: var(--space-2);
+  transition: border-color var(--duration-3) var(--ease-standard);
+}
+.link-cta:hover { border-color: var(--text); }
+
+.hover-fade { transition: opacity var(--duration-3) var(--ease-standard); }
+.hover-fade:hover { opacity: 0.7; }
+
+/* tags de evento */
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-2) var(--space-8);
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: var(--text-11);
+  letter-spacing: var(--tracking-wide);
+  border: var(--hairline) solid transparent;
+}
+
+.tag-congress   { color: var(--tag-congress-color);   background: var(--tag-congress-bg);   border-color: var(--tag-congress-border); }
+.tag-conference { color: var(--tag-conference-color); background: var(--tag-conference-bg); border-color: var(--tag-conference-border); }
+.tag-symposium  { color: var(--tag-symposium-color);  background: var(--tag-symposium-bg);  border-color: var(--tag-symposium-border); }
+
+/* status: cor nunca sozinha, sempre com o rotulo ao lado */
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  font-size: var(--text-13);
+}
+.status::before {
+  content: "";
+  width: var(--space-8);
+  height: var(--space-8);
+  border-radius: var(--radius-circle);
+  background: currentColor;
+  flex-shrink: 0;
+}
+.status-good     { color: var(--status-good); }
+.status-warning  { color: var(--status-warning); }
+.status-serious  { color: var(--status-serious); }
+.status-critical { color: var(--status-critical); }
+
+/* midia */
+
+.media {
+  border-radius: var(--radius-8);
+  overflow: hidden;
+  background: var(--dim);
+}
+
+.avatar {
+  width: var(--photo-sm);
+  height: var(--photo-sm);
+  border-radius: var(--radius-circle);
+  object-fit: cover;
+}
+
+/* controle circular, usado nas setas de galeria */
+.control-round {
+  width: var(--control-lg);
+  height: var(--control-lg);
+  padding: 0;
+  border-radius: var(--radius-circle);
+  flex-shrink: 0;
+}
+.control-round:hover { transform: none; }
+
+/* visualização de dados */
+
+/* o gráfico e sua camada de interação moram no mesmo container */
+.viz { position: relative; }
+.viz svg { width: 100%; height: auto; display: block; }
+.viz text {
+  font-family: var(--font-mono);
+  fill: var(--chart-ink-muted);
+}
+
+/* linha guia que segue o cursor em série temporal */
+.viz-crosshair {
+  stroke: var(--border-hover);
+  stroke-width: 1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--duration-2) var(--ease-standard);
+}
+.viz.is-active .viz-crosshair { opacity: 1; }
+
+/* marca destacada: anel na cor da superfície separa a marca do que está atrás */
+.viz-dot {
+  pointer-events: none;
+  opacity: 0;
+  stroke: var(--bg);
+  stroke-width: 2;
+  transition: opacity var(--duration-2) var(--ease-standard);
+}
+.viz.is-active .viz-dot { opacity: 1; }
+
+/* marca esmaecida enquanto outra está sob o cursor */
+.viz-mark {
+  transition: opacity var(--duration-2) var(--ease-standard);
+}
+.viz.is-dimmed .viz-mark { opacity: 0.28; }
+.viz.is-dimmed .viz-mark.is-hot { opacity: 1; }
+
+.viz-tip {
+  position: absolute;
+  z-index: 5;
+  min-width: 148px;
+  padding: var(--space-10) var(--space-12);
+  background-image: var(--glass-fill);
+  background-color: var(--surface-glass);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border: var(--hairline) solid var(--glass-edge);
+  box-shadow: var(--shadow-glass-rest);
+  isolation: isolate;
+  font-family: var(--font-mono);
+  font-size: var(--text-11);
+  color: var(--muted);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(var(--nudge-3));
+  transition: opacity var(--duration-2) var(--ease-standard),
+              transform var(--duration-2) var(--ease-swift);
+}
+.viz.is-active .viz-tip { opacity: 1; transform: translateY(0); }
+
+.viz-tip .head {
+  color: var(--text);
+  letter-spacing: var(--tracking-wide);
+  padding-bottom: var(--space-6);
+  margin-bottom: var(--space-6);
+  border-bottom: var(--hairline) solid var(--border);
+}
+.viz-tip .line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  padding: var(--space-2) 0;
+}
+.viz-tip .line i {
+  width: var(--space-8);
+  height: var(--space-8);
+  border-radius: var(--radius-circle);
+  flex-shrink: 0;
+}
+.viz-tip .line b {
+  margin-left: auto;
+  color: var(--text);
+  font-weight: var(--weight-regular);
+  font-variant-numeric: tabular-nums;
+}
+
+/* entrada do gráfico: mesma escada e mesmas curvas do resto da página.
+   O traço se desenha, a barra cresce a partir da base. */
+.viz-draw {
+  stroke-dasharray: var(--len);
+  stroke-dashoffset: var(--len);
+  transition: stroke-dashoffset var(--duration-6) var(--ease-out-soft);
+  transition-delay: var(--delay, 0ms);
+}
+.viz.is-in .viz-draw { stroke-dashoffset: 0; }
+
+.viz-grow {
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform var(--duration-5) var(--ease-out-expo);
+  transition-delay: var(--delay, 0ms);
+}
+.viz.is-in .viz-grow { transform: scaleY(1); }
+
+.viz-appear {
+  opacity: 0;
+  transition: opacity var(--duration-4) var(--ease-standard);
+  transition-delay: var(--delay, 0ms);
+}
+.viz.is-in .viz-appear { opacity: 1; }
+
+.viz-legend {
+  display: flex;
+  gap: var(--space-16);
+  flex-wrap: wrap;
+  font-family: var(--font-mono);
+  font-size: var(--text-11);
+  color: var(--muted);
+}
+.viz-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  cursor: default;
+  transition: color var(--duration-2) var(--ease-standard);
+}
+.viz-legend span:hover { color: var(--text); }
+.viz-legend i {
+  width: var(--space-10);
+  height: var(--space-10);
+  border-radius: var(--radius-circle);
+}
+
+/* movimento */
+
+@keyframes prussian-fade-up {
+  from { opacity: 0; transform: translateY(var(--space-12)); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes prussian-fade-scale {
+  from { opacity: 0; transform: scale(0.985); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.fade-up {
+  animation: prussian-fade-up var(--duration-6) var(--ease-out-soft) both;
+}
+
+.fade-scale {
+  animation: prussian-fade-scale var(--duration-4) var(--ease-out-expo) both;
+}
+
+/* escada de entrada: 60ms por item, no maximo seis degraus */
+.stagger > *:nth-child(1) { animation-delay: 0ms; }
+.stagger > *:nth-child(2) { animation-delay: 60ms; }
+.stagger > *:nth-child(3) { animation-delay: 120ms; }
+.stagger > *:nth-child(4) { animation-delay: 180ms; }
+.stagger > *:nth-child(5) { animation-delay: 240ms; }
+.stagger > *:nth-child(n + 6) { animation-delay: 300ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

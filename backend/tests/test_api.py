@@ -62,7 +62,8 @@ def test_catalog_filter_by_muscle_does_not_match_substrings(client):
 def test_facets_expose_the_full_taxonomy(client):
     body = client.get("/api/exercises/facets").json()
     assert len(body["muscles"]) == 19
-    assert {entry["view"] for entry in body["muscles"]} == {"front", "back"}
+    assert all(entry["views"] for entry in body["muscles"])
+    assert {v for entry in body["muscles"] for v in entry["views"]} == {"front", "back"}
     assert "SQUAT" in body["categories"]
 
 
