@@ -139,7 +139,7 @@ export function GarminSettings() {
                   <label className="myo-label mb-6">
                     <span className="eyebrow">Token do Garmin</span>
                     <textarea
-                      className="glass glass-frost glass-sq myo-field"
+                      className="myo-field"
                       rows={5}
                       required
                       value={token}
@@ -155,7 +155,7 @@ export function GarminSettings() {
                   <label className="myo-label mb-6">
                     <span className="eyebrow">E-mail</span>
                     <input
-                      className="glass glass-frost glass-sq myo-field"
+                      className="myo-field"
                       type="email"
                       autoComplete="username"
                       required
@@ -166,7 +166,7 @@ export function GarminSettings() {
                   <label className="myo-label mb-6">
                     <span className="eyebrow">Senha</span>
                     <input
-                      className="glass glass-frost glass-sq myo-field"
+                      className="myo-field"
                       type="password"
                       autoComplete="current-password"
                       required
@@ -178,7 +178,7 @@ export function GarminSettings() {
                     <label className="myo-label mb-6">
                       <span className="eyebrow">Código de verificação</span>
                       <input
-                        className="glass glass-frost glass-sq myo-field"
+                        className="myo-field"
                         inputMode="numeric"
                         value={mfaCode}
                         onChange={(event) => setMfaCode(event.target.value)}

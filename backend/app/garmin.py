@@ -5,9 +5,15 @@ library, which is an unofficial client: Garmin publishes no contract for these
 endpoints and can change them without notice. Every call here is wrapped so a
 change upstream surfaces as a readable message instead of a traceback.
 
-Credentials are never persisted. The login exchanges them for garth OAuth
-tokens, and only those tokens are written to disk, in the directory named by
+Credentials are never persisted. The login exchanges them for OAuth tokens,
+and only those tokens are written to disk, in the directory named by
 GARMINTOKENS (default ./.garth, which is gitignored).
+
+Tokens are saved through `client.client.dump(...)`. The outer object is the
+garminconnect facade and the inner one is its HTTP client, which owns the
+token store. garminconnect 0.3.9 no longer exposes a `.garth` attribute, and
+reaching for one raises only after a successful authentication, so the error
+surfaces as a credential failure for a login that in fact worked.
 """
 
 from __future__ import annotations
@@ -122,7 +128,7 @@ def login(email: str, password: str, mfa_code: str | None = None,
         client, state, _created = _PENDING_MFA.pop(key)
         try:
             client.resume_login(state, mfa_code.strip())
-            client.garth.dump(str(directory))
+            client.client.dump(str(directory))
         except Exception as exc:
             return GarminStatus(authenticated=False, detail=f"verification failed: {exc}")
         return GarminStatus(authenticated=True, profile_name=_full_name(client))
@@ -142,7 +148,7 @@ def login(email: str, password: str, mfa_code: str | None = None,
                 detail="mfa_required: resubmit with the code Garmin sent you",
             )
 
-        client.garth.dump(str(directory))
+        client.client.dump(str(directory))
     except Exception as exc:
         return GarminStatus(authenticated=False, detail=f"login failed: {exc}")
 
@@ -178,7 +184,7 @@ def login_with_token(token_blob: str, token_dir: Path | None = None) -> GarminSt
     try:
         client = Garmin()
         client.login(tokenstore=blob)
-        client.garth.dump(str(directory))
+        client.client.dump(str(directory))
     except Exception as exc:
         return GarminStatus(authenticated=False, detail=f"token rejected: {exc}")
 

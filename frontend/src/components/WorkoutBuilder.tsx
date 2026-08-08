@@ -117,7 +117,7 @@ function SortableRow({
         <label className="myo-label">
           <span className="eyebrow">Séries</span>
           <input
-            className="glass glass-frost glass-sq myo-field"
+            className="myo-field"
             type="number"
             min={1}
             max={99}
@@ -128,7 +128,7 @@ function SortableRow({
         <label className="myo-label">
           <span className="eyebrow">Repetições</span>
           <input
-            className="glass glass-frost glass-sq myo-field"
+            className="myo-field"
             type="number"
             min={1}
             max={999}
@@ -139,7 +139,7 @@ function SortableRow({
         <label className="myo-label">
           <span className="eyebrow">Descanso s</span>
           <input
-            className="glass glass-frost glass-sq myo-field"
+            className="myo-field"
             type="number"
             min={0}
             max={3600}
@@ -150,7 +150,7 @@ function SortableRow({
         <label className="myo-label">
           <span className="eyebrow">Carga kg</span>
           <input
-            className="glass glass-frost glass-sq myo-field"
+            className="myo-field"
             type="number"
             min={0}
             max={1000}
@@ -334,7 +334,7 @@ export function WorkoutBuilder({ facets }: { facets: Facets | null }) {
             <label className="myo-label flex-1 min-w-48">
               <span className="eyebrow">Nome</span>
               <input
-                className="glass glass-frost glass-sq myo-field"
+                className="myo-field"
                 value={name}
                 onChange={(event) => setName(event.target.value)}
               />

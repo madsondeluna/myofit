@@ -75,15 +75,17 @@ body {
 }
 
 /* --- Form field ----------------------------------------------------------
-   The language has no input pattern, so this composes one from the material:
-   .glass .glass-frost .glass-sq in the markup, and only the type, padding and
-   size here.
+   The language has no input pattern, and this one is deliberately not glass.
 
-   Frost is the right texture for a field. It is the most opaque of the four,
-   the only one that carries grain, and it keeps a value legible over whatever
-   scrolls behind it. Thin or plain glass under body text reads as smudge. */
+   A backdrop-filter samples its parent's already-composited output, not the
+   page ground. A glass field inside a glass card inside a glass bar is
+   therefore blurring an almost flat fill: it costs three paint passes and
+   returns a washed-out box with the value hard to read. Fields are opaque. */
 
 .myo-field {
+  background: var(--surface);
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-8);
   color: var(--text);
   font-family: var(--font-sans);
   font-size: var(--text-13);
@@ -91,16 +93,22 @@ body {
   width: 100%;
 }
 
+.myo-field:hover {
+  border-color: var(--border-hover);
+}
+
 .myo-field:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: -1px;
+  border-color: var(--accent);
 }
 
 /* The select keeps its native arrow. Stripping the appearance would mean
    supplying one as a background-image, which is the same slot the glass fill
    occupies, so the material and the indicator cannot both be there. */
 select.myo-field {
-  padding-right: var(--space-4);
+  /* Room for the native arrow, which sits inside the box. */
+  padding-right: var(--space-24);
 }
 
 /* Gap between a label and its field: control-internal, not layout rhythm. */
@@ -160,6 +168,15 @@ body::before {
   box-shadow: var(--shadow-glass-hover);
 }
 
+.pill.glass-lift {
+  transition:
+    background-image var(--duration-5) var(--ease-out-soft),
+    border-color var(--duration-5) var(--ease-out-soft),
+    box-shadow var(--duration-5) var(--ease-out-soft),
+    transform var(--duration-5) var(--ease-out-soft),
+    color var(--duration-4) var(--ease-out-soft);
+}
+
 .pill:disabled,
 .pill[aria-disabled="true"] {
   opacity: 0.45;
@@ -199,8 +216,13 @@ body::before {
    a link; here a list of exercises is not clickable as a whole, so the
    pointer goes back to default and only the controls inside claim it. */
 
+/* Rounded, by request. This is a declared divergence from the language, which
+   allows exactly three radii and gives surfaces zero: the separation is meant
+   to come from the 1px hairline, not the corner. Surfaces here take
+   --radius-12 and fields --radius-8, both existing tokens, so no new value
+   enters the scale. */
 .myo-card {
-  border-radius: var(--radius-0);
+  border-radius: var(--radius-12);
   cursor: default;
 }
 
@@ -209,6 +231,8 @@ body::before {
    place .glass-deep is meant for: 56px of blur, enough that the page reading
    under them dissolves instead of showing through as legible text. */
 
+/* The bars span the viewport edge to edge, so they keep square corners:
+   rounding a full-bleed bar leaves slivers of page at the top corners. */
 .myo-bar {
   border-radius: var(--radius-0);
 }

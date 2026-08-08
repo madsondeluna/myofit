@@ -72,7 +72,7 @@ export function ExerciseCatalog({
             <label className="myo-label">
               <span className="eyebrow">Buscar</span>
               <input
-                className="glass glass-frost glass-sq myo-field"
+                className="myo-field"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Supino"
@@ -81,7 +81,7 @@ export function ExerciseCatalog({
             <label className="myo-label">
               <span className="eyebrow">Categoria</span>
               <select
-                className="glass glass-frost glass-sq myo-field"
+                className="myo-field"
                 value={category}
                 onChange={(event) => setCategory(event.target.value)}
               >
@@ -96,7 +96,7 @@ export function ExerciseCatalog({
             <label className="myo-label">
               <span className="eyebrow">Equipamento</span>
               <select
-                className="glass glass-frost glass-sq myo-field"
+                className="myo-field"
                 value={equipment}
                 onChange={(event) => setEquipment(event.target.value)}
               >
@@ -111,7 +111,7 @@ export function ExerciseCatalog({
             <label className="myo-label">
               <span className="eyebrow">Músculo</span>
               <select
-                className="glass glass-frost glass-sq myo-field"
+                className="myo-field"
                 value={muscle}
                 onChange={(event) => setMuscle(event.target.value as MuscleId | "")}
               >
