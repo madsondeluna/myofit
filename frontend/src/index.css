@@ -344,7 +344,14 @@ body::before {
      hover, so the padding holds its visible extent and the equal negative
      margin keeps the rail's own box unchanged. */
   padding: var(--space-16) var(--space-20);
-  margin: calc(-1 * var(--space-16)) calc(-1 * var(--space-20));
+
+  /* Longhand, and deliberately not margin-bottom. The `margin` shorthand also
+     sets margin-bottom, and this rule comes after the utility layer, so it
+     silently overrode any spacing class on the same element: a rail marked
+     mb-12 ended up at -16px and its pills landed on top of the card below. */
+  margin-top: calc(-1 * var(--space-16));
+  margin-left: calc(-1 * var(--space-20));
+  margin-right: calc(-1 * var(--space-20));
 }
 
 .myo-rail::-webkit-scrollbar {
