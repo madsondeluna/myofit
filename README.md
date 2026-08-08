@@ -233,6 +233,98 @@ daemon was available. Its two non-obvious lines were checked another way: the
 `uv pip install -r pyproject.toml` was run locally and resolves the full
 dependency set.
 
+## Next steps
+
+Ordered by what would hurt most if left alone. Everything here is known and
+deliberate, not discovered later.
+
+### Before any public deploy
+
+**The API has no authentication.** Every route is open: anyone who reaches the
+Render URL can read, edit and delete workouts, and can trigger `POST
+/api/workouts/{id}/sync`, which pushes to whichever Garmin account the stored
+token belongs to. The token sits on the mounted disk and is used without any
+check on who is asking. This is safe on localhost and unsafe the moment the
+service is reachable, so either put the service behind an authenticating proxy
+or add a session layer before pointing a domain at it.
+
+**The pending-MFA store is in-process.** `_PENDING_MFA` in `garmin.py` is a
+module-level dict, so a second worker will not find the login attempt the
+verification code was issued for. Fine on a single Uvicorn process; it needs
+shared storage before scaling out.
+
+### Unverified, not unwritten
+
+These paths are implemented and have never executed:
+
+- **Garmin sync against a live account.** The payload is built with the
+  library's own typed strength-workout builders, so the field shapes come from
+  upstream rather than from guesswork, but no request has ever been sent. The
+  first real login is also the first execution of `client.client.dump(...)`,
+  the token-persistence call. An earlier version of that line used a `.garth`
+  attribute that garminconnect 0.3.9 does not expose, which would have thrown
+  only after a successful authentication and surfaced as a credential failure.
+  The equivalent mistake elsewhere in that file would fail the same way.
+- **The two-factor resume.** Parking the attempt and resuming it with the code
+  is the shape Garmin requires, but only a live MFA account proves it.
+- **The Docker image.** Never built, because no Docker daemon was available.
+  Its two non-obvious lines were checked another way: the `uv` binary path
+  matches the official image's documented layout, and
+  `uv pip install -r pyproject.toml` resolves the full dependency set locally.
+
+### Correctness
+
+- **The equipment coverage map is computed over a capped sample.** The browser
+  requests 200 exercises, which is the API's page limit, and aggregates those.
+  The count shown is the true total, so the number is honest, but the heat map
+  is not: for a type with more than 200 entries it reflects the first page.
+  Either aggregate server side or raise the cap for this call.
+- **The muscle filter scans.** `list_exercises` matches a muscle with a LIKE
+  over the serialised JSON column. Correct, and quoted so `abs` cannot match
+  `abductors`, but it reads every row. A join table, or SQLite's JSON1, would
+  make it an index lookup.
+- **There are no frontend tests.** The Python suite covers the API, the
+  catalog, the FIT round trip and the SVG path coverage. Nothing exercises the
+  React layer, and every visual defect found so far was found by a person
+  looking at the page.
+
+### Interface
+
+- **The body map geometry is unfinished.** The adductors and obliques are
+  thinner than the muscles they represent, and the quadriceps stops short of
+  the knee. The shapes are hand-authored halves in `figures.ts`, mirrored at
+  render time, so each fix is one path.
+- **The drag handle has no touch affordance.** The grip is a drawn icon whose
+  meaning is carried by `title`, and `title` never fires on touch. The position
+  number beside each exercise gives the order at rest, which helps, but on a
+  phone the control still has to be discovered by trying it.
+- **Controls render in Geist Mono.** That is what Prussian's `.pill` specifies,
+  and the language lists chips among the mono roles. It is a deliberate
+  inheritance rather than a choice, and overriding it is one declaration.
+
+### Performance
+
+- Roughly 265 kB of JavaScript, of which the drag-and-drop library is the
+  largest single piece. It is loaded on every screen although only the builder
+  uses it; a dynamic import would move it off the first paint.
+- Glass is a live `backdrop-filter` on every control, card, panel and bar. Each
+  one is a real compositing pass, and the count has never been profiled on a
+  phone. If scrolling stutters there, the first thing to try is dropping the
+  material from the list rows and keeping it on the chrome.
+- Seeding walks 1846 enum members on first boot. It is idempotent and runs
+  once, but it happens inside the application lifespan, so a cold start on a
+  fresh disk pays for it before serving.
+
+### A note on how the visual bugs arrived
+
+Four of the interface defects in this repository's history were cascade
+problems, not wrong values: a rule written correctly that never reached the
+element. `.myo-bar` losing to `.glass:not(.card-glass)` on specificity, `.pill`
+overriding `.glass-lift`'s transition list, the `margin` shorthand erasing a
+spacing utility, and `overflow-x` clipping a shadow on the axis nobody set.
+Reading the source proves nothing about any of them. Grepping the built
+stylesheet in `frontend/dist/assets/` does.
+
 ## Design language
 
 The interface follows Prussian. `frontend/src/prussian/` is a vendored copy of
