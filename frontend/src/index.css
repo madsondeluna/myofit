@@ -169,8 +169,7 @@ body::before {
 .pill[aria-pressed="true"] {
   color: var(--text);
   background-image: var(--glass-fill-hover);
-  border-color: var(--glass-edge-hover);
-  box-shadow: var(--shadow-glass-hover);
+  border-color: var(--border-hover);
 }
 
 .pill.glass-lift {
@@ -323,43 +322,49 @@ body::before {
   outline-offset: 2px;
 }
 
-/* --- Horizontal scroll rail ---------------------------------------------
-   On a phone the navigation and the equipment filters do not fit on one line.
-   Wrapping them pushes the content down; a rail keeps the row one line tall
-   and lets it slide sideways. */
+/* --- Control rail -------------------------------------------------------
+   A wrapping row by default. It only becomes a scroller on a narrow viewport,
+   where four pills do not fit on one line and wrapping would push the page
+   down.
+
+   The scroll container is confined to that media query on purpose. `overflow`
+   makes the element a clipping and stacking context, and glass neighbours
+   inside one make Chrome sample past their own boxes and paint a ghost
+   rectangle behind the row, which is the artefact the language warns about.
+   On a wide viewport there is nothing to scroll, so there is no reason to pay
+   for it. */
 
 .myo-rail {
   display: flex;
+  flex-wrap: wrap;
   /* 12px, not 8: the glass edge is white and at 8px two neighbouring pills
      read as one continuous bar. */
   gap: var(--space-12);
-  overflow-x: auto;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-
-  /* Setting overflow-x to auto makes overflow-y compute to auto as well: the
-     rail clips vertically even though nothing ever overflows that way. Without
-     this reserve it cut the glass shadow off the top and bottom of every pill,
-     which read as pills with flattened edges. The shadow runs 0 10px 28px at
-     hover, so the padding holds its visible extent and the equal negative
-     margin keeps the rail's own box unchanged. */
-  padding: var(--space-16) var(--space-20);
-
-  /* Longhand, and deliberately not margin-bottom. The `margin` shorthand also
-     sets margin-bottom, and this rule comes after the utility layer, so it
-     silently overrode any spacing class on the same element: a rail marked
-     mb-12 ended up at -16px and its pills landed on top of the card below. */
-  margin-top: calc(-1 * var(--space-16));
-  margin-left: calc(-1 * var(--space-20));
-  margin-right: calc(-1 * var(--space-20));
 }
 
-.myo-rail::-webkit-scrollbar {
-  display: none;
-}
+@media (max-width: 640px) {
+  .myo-rail {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
 
-.myo-rail > * {
-  flex: 0 0 auto;
+    /* Room for the glass shadow, which the scroll box would otherwise clip.
+       Longhand, and deliberately not margin-bottom: the `margin` shorthand
+       would also override any spacing utility on the same element. */
+    padding: var(--space-16) var(--space-20);
+    margin-top: calc(-1 * var(--space-16));
+    margin-left: calc(-1 * var(--space-20));
+    margin-right: calc(-1 * var(--space-20));
+  }
+
+  .myo-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .myo-rail > * {
+    flex: 0 0 auto;
+  }
 }
 
 /* --- Body map ------------------------------------------------------------ */
